@@ -1,0 +1,96 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Lecturer Registration{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+
+    :root {
+        --primary-color: #0056b3;
+        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    body, .btn {
+        font-family: 'Poppins', sans-serif;
+    }
+    .registration-card {
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: none;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .branding-panel {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
+        color: white;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .branding-panel .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .branding-panel h2 { font-weight: 700; }
+    .branding-panel ul { padding-left: 1.5rem; }
+    .branding-panel li { margin-bottom: 0.5rem; }
+
+    .form-panel { padding: 2rem; }
+    @media (min-width: 992px) { .form-panel { padding: 3rem; } }
+
+    .input-group-text { background-color: transparent; border-right: 0; color: #6c757d; }
+    .form-control { border-left: 0 !important; }
+    .form-control:focus { box-shadow: none !important; border-color: #dee2e6 !important; }
+</style>
+
+<div class="container my-4 my-lg-5">
+    <div class="registration-card">
+        <div class="row g-0">
+            <div class="col-lg-5 d-none d-lg-flex branding-panel">
+                <div>
+                    <div class="icon"><i class="bi bi-briefcase-fill"></i></div>
+                    <h2>Lecturer & Staff Portal</h2>
+                    <p class="lead">Create a staff account to manage courses, monitor attendance, and generate reports.</p>
+                    <hr class="bg-light">
+                    <h5>Your account will allow you to:</h5>
+                    <ul>
+                        <li>Access the main dashboard.</li>
+                        <li>Launch new attendance sessions.</li>
+                        <li>View and export detailed reports.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="form-panel">
+                    <h1 class="fw-bold mb-4 text-center">Create a Lecturer Account</h1>
+                    {% if messages %}{% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}{% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.first_name }}</div></div>
+                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.last_name }}</div></div>
+                        </div>
+                        <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-envelope"></i></span>{{ form.email }}</div>
+                        <div class="input-group mb-4"><span class="input-group-text"><i class="bi bi-key"></i></span>{{ form.password }}</div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">Create Staff Account</button>
+                        </div>
+                    </form>
+
+                     <div class="text-center mt-4">
+                        <small class="text-muted">Already have an account? 
+                            <a href="{% url 'login' %}">Log In</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Student Registration Portal{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    
+    :root {
+        --primary-color: #0056b3;
+        --success-color: #28a745;
+        --neutral-color: #6c757d;
+        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    body, .btn {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .registration-card {
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: none;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .branding-panel {
+        background: linear-gradient(135deg, var(--primary-color), #007bff);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .branding-panel .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .branding-panel h2 { font-weight: 700; }
+    .branding-panel ul { padding-left: 1.5rem; }
+    .branding-panel li { margin-bottom: 0.5rem; }
+
+    .form-panel { padding: 2rem; }
+    @media (min-width: 992px) { .form-panel { padding: 3rem; } }
+
+    .input-group-text { background-color: transparent; border-right: 0; color: var(--neutral-color); }
+    .form-control { border-left: 0 !important; }
+    .form-control:focus { box-shadow: none !important; border-color: #dee2e6 !important; }
+    
+    #camera-container {
+        border-radius: 50% !important;
+        overflow: hidden;
+        border: 5px solid var(--neutral-color);
+        transition: border-color 0.5s ease;
+        position: relative;
+    }
+    .pulsing-border { animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 86, 179, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 86, 179, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 86, 179, 0); }
+    }
+</style>
+
+<div class="container my-4 my-lg-5">
+    <div class="registration-card">
+        <div class="row g-0">
+            <div class="col-lg-5 d-none d-lg-flex branding-panel">
+                <div>
+                    <div class="icon"><i class="bi bi-shield-check"></i></div>
+                    <h2>Secure Your Profile</h2>
+                    <p class="lead">Follow the steps to create a secure, biometrically-verified account.</p>
+                    <hr class="bg-light">
+                    <h5>Instructions:</h5>
+                    <ul>
+                        <li>Fill in your details accurately.</li>
+                        <li>Ensure you are in a well-lit area for face capture.</li>
+                        <li>Look directly into the camera. The system will guide you.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="form-panel">
+                    <h1 class="fw-bold mb-4 text-center">Create an Account</h1>
+                    {% if messages %}{% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}{% endif %}
+                    
+                    <form id="registrationForm" method="post" novalidate>
+                        {% csrf_token %}
+                        <h4 class="mb-3">Step 1: Your Details</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.first_name }}</div></div>
+                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.last_name }}</div></div>
+                        </div>
+                        <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-envelope"></i></span>{{ form.email }}</div>
+                        <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-card-text"></i></span>{{ form.matric_number }}</div>
+                        <div class="input-group mb-4"><span class="input-group-text"><i class="bi bi-key"></i></span>{{ form.password }}</div>
+                        <input type="hidden" name="face_samples" id="face_samples_input">
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-3 text-center">Step 2: Face Capture</h4>
+                        <div class="d-flex flex-column align-items-center">
+                            <div id="camera-container" class="shadow-sm" style="width: 250px; height: 250px;">
+                                <video id="video" style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);" autoplay playsinline muted></video>
+                                <canvas id="overlay_canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1);"></canvas>
+                            </div>
+                            <p id="progress-text" class="mt-3 fs-5 fw-bold text-muted">0 / 20 Samples</p>
+                            <button type="button" id="startCaptureBtn" class="btn btn-primary btn-lg mt-2" style="width: 250px;">
+                                <i class="bi bi-camera-fill me-2"></i> Start Capture
+                            </button>
+                        </div>
+                        
+                        <hr class="my-4">
+
+                        <div class="d-grid"><button type="submit" id="submitBtn" class="btn btn-success btn-lg fw-bold" disabled>Create My Account</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+<script type="module">
+  
+    const video = document.getElementById('video');
+    const overlayCanvas = document.getElementById('overlay_canvas');
+    const canvasCtx = overlayCanvas.getContext('2d');
+    const startCaptureBtn = document.getElementById('startCaptureBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressText = document.getElementById('progress-text');
+    const faceSamplesInput = document.getElementById('face_samples_input');
+    const cameraContainer = document.getElementById('camera-container');
+
+    const TOTAL_SAMPLES = 20;
+    const CAPTURE_INTERVAL_MS = 400; 
+    let faceSamples = [];
+    
+    let isCapturing = false;
+    let lastCaptureTime = 0;
+
+    
+    const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+    faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    faceMesh.onResults(onResults);
+
+    const camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
+    camera.start();
+
+  
+    function onResults(results) {
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        
+        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+
+            drawConnectors(canvasCtx, results.multiFaceLandmarks[0], window.FACEMESH_OVAL, {color: 'var(--success-color)', lineWidth: 3});
+            
+        
+            if (isCapturing && faceSamples.length < TOTAL_SAMPLES) {
+                const now = Date.now();
+                if (now - lastCaptureTime > CAPTURE_INTERVAL_MS) {
+                    lastCaptureTime = now;
+                    captureSample();
+                }
+            }
+        }
+        canvasCtx.restore();
+    }
+
+  
+    startCaptureBtn.addEventListener('click', () => {
+        isCapturing = true;
+        startCaptureBtn.disabled = true;
+        startCaptureBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Capturing...';
+        cameraContainer.classList.add('pulsing-border');
+        cameraContainer.style.borderColor = 'var(--primary-color)';
+    });
+
+    function captureSample() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+
+        ctx.translate(video.videoWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        faceSamples.push(dataUrl);
+        updateProgress();
+    }
+
+    function updateProgress() {
+        progressText.textContent = `${faceSamples.length} / ${TOTAL_SAMPLES} Samples`;
+        if (faceSamples.length >= TOTAL_SAMPLES) {
+            completeCapture();
+        }
+    }
+
+    function completeCapture() {
+        isCapturing = false;
+        startCaptureBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Capture Complete!';
+        startCaptureBtn.classList.replace('btn-primary', 'btn-success');
+        cameraContainer.classList.remove('pulsing-border');
+        cameraContainer.style.borderColor = 'var(--success-color)';
+        progressText.style.color = 'var(--success-color)';
+        submitBtn.disabled = false;
+        faceSamplesInput.value = JSON.stringify(faceSamples);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'attendance/base.html' %}
+{% load static %}
+{% block title %}Welcome to FaceRec Attendance{% endblock %}
+
+{% block styles %}
+<style>
+
+    .hero-section {
+        background: linear-gradient(rgba(0, 35, 102, 0.85), rgba(0, 35, 102, 0.85)), url('{% static "images/hero-background.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 6rem 1rem;
+        text-align: center;
+    }
+    .hero-section h1 {
+        font-weight: 700;
+        font-size: clamp(2.5rem, 5vw, 3.8rem); 
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3); 
+    }
+    .hero-section .lead {
+        font-size: clamp(1.2rem, 3vw, 1.5rem);
+        max-width: 800px;
+        margin: 1.5rem auto;
+    }
+    .features-section {
+        padding: 5rem 1rem;
+        background-color: var(--body-bg); 
+    }
+    .feature-card {
+        border: none;
+        background: #ffffff;
+        padding: 2.5rem 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 86, 179, 0.15);
+    }
+    .feature-card .icon {
+        font-size: 3.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        display: inline-block;
+    }
+    .how-it-works-section {
+        padding: 5rem 1rem;
+        background-color: #ffffff;
+    }
+    .step-indicator {
+        width: 60px;
+        height: 60px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 5px 15px rgba(0, 86, 179, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section rounded-3 mb-5 shadow-lg">
+    <div class="container">
+        <h1 class="display-4">Seamless Attendance, Secured by Face.</h1>
+        <p class="lead">
+            The future of attendance management is here. Our system uses advanced facial recognition to provide a fast, secure, and touchless experience.
+        </p>
+        <div>
+            <a href="{% url 'student_registration' %}" class="btn btn-light btn-lg fw-bold px-4 me-2 mt-2">
+                <i class="bi bi-person-plus-fill me-2"></i>Register as a Student
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg fw-bold px-4 mt-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <h2 class="text-center fw-bold display-5 mb-5">Why Choose Our System?</h2>
+        <div class="row g-4">
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card">
+                    <div class="icon"><i class="bi bi-camera-video-fill"></i></div>
+                    <h4 class="fw-bold">Real-Time Liveness</h4>
+                    <p class="text-muted">Multi-step, randomized liveness detection ensures the user is physically present, preventing spoofing with photos or videos.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card">
+                    <div class="icon"><i class="bi bi-shield-lock-fill"></i></div>
+                    <h4 class="fw-bold">Secure & Accurate</h4>
+                    <p class="text-muted">Using advanced computer vision, the system provides highly accurate recognition while storing all data securely.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 d-flex align-items-stretch">
+                <div class="feature-card">
+                    <div class="icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                    <h4 class="fw-bold">Instant Reporting</h4>
+                    <p class="text-muted">Lecturers can instantly view attendance records and export professional, formatted PDF reports for official use.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="how-it-works-section">
+    <div class="container">
+        <h2 class="text-center fw-bold display-5 mb-5">A Simple & Secure Process</h2>
+        <div class="row g-5 text-center">
+            <div class="col-md-4">
+                <div class="step-indicator">1</div>
+                <h4 class="fw-bold mt-3">Register Your Profile</h4>
+                <p class="text-muted">Students create a secure profile once, capturing face samples from their own device. The system ensures only high-quality data is saved.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="step-indicator">2</div>
+                <h4 class="fw-bold mt-3">Mark Attendance</h4>
+                <p class="text-muted">The lecturer initiates a session on a single device. Students simply look at the camera and perform a quick liveness check to be marked present instantly.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="step-indicator">3</div>
+                <h4 class="fw-bold mt-3">View Reports</h4>
+                <p class="text-muted">Lecturers and students can log in to their respective dashboards to view detailed attendance history anytime, anywhere.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

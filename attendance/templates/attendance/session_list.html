@@ -1,0 +1,124 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Attendance Sessions{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+
+    :root {
+        --primary-color: #0056b3;
+        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    }
+    body, .card, .btn, .table {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+
+    .table thead th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        border-bottom: 0;
+    }
+    .table tbody tr:hover {
+        background-color: #eef2f9;
+        cursor: pointer;
+    }
+
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    .empty-state .icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold">Session Reports</h1>
+        <div class="col-12 col-md-4">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search sessions...">
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+             {% if sessions %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="sessionsTable">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="ps-4">Course Name</th>
+                                <th scope="col">Course Code</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Attendees</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ session.course.course_name }}</td>
+                                    <td><span class="badge bg-secondary">{{ session.course.course_code }}</span></td>
+                                    <td>{{ session.created_at|date:"l, M d, Y" }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary rounded-pill fs-6">{{ session.attendee_count }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye-fill me-1"></i> View Report
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="icon mb-3"><i class="bi bi-folder-x"></i></div>
+                    <h2 class="fw-bold">No Sessions Recorded</h2>
+                    <p class="text-muted fs-5">
+                        Once you run an attendance kiosk, the session reports will appear here.
+                    </p>
+                    <a href="{% url 'lecturer_dashboard' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-camera-video-fill me-2"></i>Start a New Session
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('sessionsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) { 
+            let cells = rows[i].getElementsByTagName('td');
+            let found = false;
+            for (let j = 0; j < cells.length - 1; j++) {
+                if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    found = true;
+                    break;
+                }
+            }
+            rows[i].style.display = found ? '' : 'none';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Add New Course{% endblock %}
+
+{% block styles %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+
+    :root {
+        --primary-color: #0056b3;
+        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    body, .btn {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .add-course-card {
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        border: none;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .info-panel {
+        background: linear-gradient(135deg, #0056b3, #007bff);
+        color: white;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .info-panel .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .info-panel h2 { font-weight: 700; }
+
+    .form-panel { padding: 2rem; }
+    @media (min-width: 992px) { .form-panel { padding: 3rem; } }
+
+    .input-group-text { background-color: transparent; border-right: 0; color: #6c757d; }
+    .form-control { border-left: 0 !important; }
+    .form-control:focus { box-shadow: none !important; border-color: #dee2e6 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4 my-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="add-course-card">
+                <div class="row g-0">
+                    <div class="col-lg-5 d-none d-lg-flex info-panel">
+                        <div>
+                            <div class="icon"><i class="bi bi-journal-plus"></i></div>
+                            <h2>Course Management</h2>
+                            <p class="lead">Add a new course to the system to begin tracking attendance for it.</p>
+                            <hr class="bg-light">
+                            <p class="small">Please ensure the course code is unique and the course name is descriptive.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <div class="form-panel">
+                            <h1 class="fw-bold mb-4 text-center">Add a New Course</h1>
+                            
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+                                
+                                <label class="form-label fw-bold">Course Name</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="bi bi-book-half"></i></span>
+                                    {{ form.course_name }}
+                                </div>
+                                
+                                <label class="form-label fw-bold">Course Code</label>
+                                <div class="input-group mb-4">
+                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                    {{ form.course_code }}
+                                </div>
+                                
+                                <div class="d-flex align-items-center justify-content-between mt-4">
+                                    <a href="{% url 'lecturer_dashboard' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left-circle me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                                        <i class="bi bi-plus-circle-fill me-2"></i>Create Course
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
