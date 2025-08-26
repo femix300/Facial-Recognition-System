@@ -166,6 +166,7 @@
     const resultName = document.getElementById('result-name');
     const sessionId = "{{ session_id }}";
     let isProcessing = false;
+    let isTransitioning = false;
 
   
     const challenges = {
@@ -190,8 +191,18 @@
             instruction: "Please Open Your Mouth",
             iconId: "mouth-icon",
             detectionFunction: (landmarks) => {
-                const upperLip = landmarks[13], lowerLip = landmarks[14];
-                return Math.abs(upperLip.y - lowerLip.y) > 0.05;
+                const topLip = landmarks[13];
+                const bottomLip = landmarks[14];
+                const leftCorner = landmarks[61];
+                const rightCorner = landmarks[291];
+        
+                const verticalDist = Math.hypot(topLip.y - bottomLip.y, topLip.x - bottomLip.x);
+                const horizontalDist = Math.hypot(leftCorner.y - rightCorner.y, leftCorner.x - rightCorner.x);
+                
+                if (horizontalDist === 0) return false;
+        
+                const mar = verticalDist / horizontalDist;
+                return mar > 0.5; // Threshold for a clearly open mouth
             }
         },
         TURN_HEAD: {
@@ -252,7 +263,11 @@
     
 
     camera.start()
-        .then(startLivenessCheck)
+        .then(.then(() => {
+            overlayCanvas.width = video.videoWidth;
+            overlayCanvas.height = video.videoHeight;
+            startLivenessCheck();
+        })
         .catch(err => {
             console.error("Camera Error:", err);
             statusDiv.textContent = "Camera access denied or unavailable.";
@@ -262,30 +277,40 @@
     function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-        if (isProcessing) { canvasCtx.restore(); return; }
-
+    
+        // Block processing during transitions or when sending data
+        if (isProcessing || isTransitioning) { 
+            canvasCtx.restore(); 
+            return; 
+        }
+    
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
             drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: 'var(--neutral-color)', lineWidth: 1});
             cameraContainer.style.borderColor = 'var(--primary-color)';
-
+    
             const currentChallengeKey = challengeSequence[currentChallengeIndex];
-            if (!currentChallengeKey) { canvasCtx.restore(); return; } // Safety check
+            if (!currentChallengeKey) { canvasCtx.restore(); return; }
             const challenge = challenges[currentChallengeKey];
-
+    
             if (challenge.detectionFunction(landmarks)) {
+                isTransitioning = true; // Start the transition to block other actions
                 currentChallengeIndex++;
-                updateInstruction();
-
+    
                 if (currentChallengeIndex >= challengeSequence.length) {
-                    isProcessing = true;
+                    isProcessing = true; 
+                    isTransitioning = false;
                     statusDiv.textContent = 'Liveness Confirmed!';
                     drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: 'var(--success-color)', lineWidth: 2});
                     cameraContainer.style.borderColor = 'var(--success-color)';
                     setTimeout(captureAndSendImage, 500);
                 } else {
-
-                    statusDiv.textContent = '✅ Great! Next...'; 
+                    // Show temporary feedback, then show the next instruction
+                    statusDiv.textContent = '✅ Great! Next...';
+                    setTimeout(() => {
+                        updateInstruction();
+                        isTransitioning = false; // End transition, ready for next detection
+                    }, 1200); // 1.2 second pause for user to see feedback
                 }
             }
         } else {

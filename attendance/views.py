@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 import io
 import base64
 import json
+import tempfile
 from datetime import date
 import cv2
 import numpy as np
@@ -29,36 +30,53 @@ def is_lecturer(user):
     return user.is_staff
 
 
-def train_lbph_model_from_samples(face_samples_b64: list):
+def train_lbph_model_from_samples(face_samples_b64: list) -> str:
+
     face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
-    face_samples, ids = [], []
-    user_id = 1
+    
+    face_samples = []
+
+    user_id = 1 
+    ids = []
+
     for b64_img in face_samples_b64:
         try:
-            format, imgstr = b64_img.split(';base64,')
-            image_data = base64.b64decode(imgstr)
+
+            _format, img_str = b64_img.split(';base64,')
+   
+            image_data = base64.b64decode(img_str)
+          
             nparr = np.frombuffer(image_data, np.uint8)
+            
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
             faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+            
             if len(faces) == 1:
                 x, y, w, h = faces[0]
+
                 face_samples.append(gray[y:y+h, x:x+w])
                 ids.append(user_id)
-        except Exception:
+        except Exception as e:
+
+            print(f"Skipping a problematic image sample. Error: {e}")
             continue
 
+    
     if len(face_samples) < 10:
-        return None
+        raise ValueError(f"Insufficient valid face samples. Found {len(face_samples)}, need at least 10.")
 
+    
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.train(face_samples, np.array(ids))
-
-    with io.BytesIO() as mem_buffer:
-        recognizer.write(mem_buffer)
-        mem_buffer.seek(0)
-        return base64.b64encode(mem_buffer.read()).decode('utf-8')
+    
+    with tempfile.NamedTemporaryFile(delete=True, suffix='.yml') as temp_f:
+        recognizer.write(temp_f.name)
+        temp_f.seek(0)
+        model_bytes = temp_f.read()
+    return base64.b64encode(model_bytes).decode('utf-8')
 
 
 
@@ -369,3 +387,10 @@ def process_frame(request):
 
     except Exception:
         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
+        
+        
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_500_view(request):
+    return render(request, '500.html', status=500)

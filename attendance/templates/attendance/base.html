@@ -82,7 +82,12 @@
                         <li class="nav-item"><span class="navbar-text me-3">Welcome, {{ user.first_name }}!</span></li>
                         
                         {% if user.is_staff %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'lecturer_dashboard' %}"><i class="bi bi-grid-fill me-1"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'lecturer_dashboard' %}"><i class="bi bi-grid-fill me-1"></i> Lecturer Dashboard</a></li>
+                            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:index' %}">
+                    <i class="bi bi-shield-lock-fill me-1"></i>Admin
+                </a>
+            </li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'session_list' %}"><i class="bi bi-card-checklist me-1"></i> Reports</a></li>
                         {% else %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'student_dashboard' %}"><i class="bi bi-person-circle me-1"></i> My Dashboard</a></li>
