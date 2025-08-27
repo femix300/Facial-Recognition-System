@@ -183,8 +183,7 @@
     const sessionId = "{{ session_id }}";
     
     let blinkState = {
-        wasOpen: true,
-        detected: false
+        wasOpen: true 
     };
     
     let isProcessing = false;
@@ -195,7 +194,6 @@
         BLINK: {
             instruction: "Please Blink Your Eyes",
             iconId: "blink-icon",
-            
             detectionFunction: (landmarks) => {
                 const leftEyeIndices = [33, 160, 158, 133, 153, 144];
                 const rightEyeIndices = [362, 385, 387, 263, 373, 380];
@@ -209,15 +207,15 @@
                 const avgEAR = (getEAR(leftEyeIndices) + getEAR(rightEyeIndices)) / 2.0;
                 const isClosed = avgEAR < 0.23; 
     
-                // State logic: if eyes were open and are now closed, it's a blink.
+                let blinked = false;
                 if (blinkState.wasOpen && isClosed) {
-                    blinkState.detected = true;
+                    blinked = true;
                 }
-    
-                
+
+                // Update the state for the next frame.
                 blinkState.wasOpen = !isClosed;
-                
-                return blinkState.detected;
+
+                return blinked;
             }
         },
         MOUTH_OPEN: {
@@ -383,6 +381,7 @@
             iconClass = 'bi bi-check-circle-fill text-success';
             studentName = data.student_name;
             messageText = `Matric: ${data.matric_number}`;
+            updateLog(data.student_name, data.matric_number, new Date().toLocaleTimeString());
         } else if (data.status === 'already_marked') {
             overlayColor = 'var(--warning-color)';
             iconClass = 'bi bi-info-circle-fill text-warning';

@@ -99,22 +99,23 @@ def student_registration(request):
             email = form.cleaned_data['email']
             matric_number = form.cleaned_data['matric_number']
             
-            if User.objects.filter(username=email).exists() or Student.objects.filter(matric_number=matric_number).exists():
-                messages.error(request, 'A user with this email or matric number already exists.')
-                return redirect('student_registration')
+            if User.objects.filter(username=email).exists():
+                messages.error(request, 'A user with this email already exists.')
+                return render(request, 'attendance/registration.html', {'form': form})
+            if Student.objects.filter(matric_number=matric_number).exists():
+                messages.error(request, 'A student with this matriculation number already exists.')
+                return render(request, 'attendance/registration.html', {'form': form})
 
             face_samples_json = request.POST.get('face_samples')
             if not face_samples_json:
-                messages.error(request, 'No face samples were captured. Please try again.')
-                return redirect('student_registration')
+                messages.error(request, 'Face samples were not provided. Please complete the face capture step.')
+                return render(request, 'attendance/registration.html', {'form': form})
 
-            model_b64 = train_lbph_model_from_samples(json.loads(face_samples_json))
-
-            if not model_b64:
-                messages.error(request, 'Could not detect a clear face in enough samples. Try again in better lighting.')
-                return redirect('student_registration')
-            
             try:
+                face_samples = json.loads(face_samples_json)
+
+                model_b64 = train_lbph_model_from_samples(face_samples)
+                
                 with transaction.atomic():
                     user = User.objects.create_user(
                         username=email,
@@ -123,12 +124,21 @@ def student_registration(request):
                         last_name=form.cleaned_data['last_name'],
                         email=email
                     )
-                    Student.objects.create(user=user, matric_number=matric_number, lbph_model_data=model_b64)
+                    Student.objects.create(
+                        user=user, 
+                        matric_number=matric_number, 
+                        lbph_model_data=model_b64
+                    )
+                
                 messages.success(request, 'Registration successful! You can now log in.')
                 return redirect('login')
+            except ValueError as ve:
+                messages.error(request, f"Face recognition failed: {ve}. Please try again in better lighting and ensure your face is clear.")
             except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
-    else:
+                logger.error(f"An unexpected error occurred during student registration: {e}")
+                messages.error(request, 'An unexpected error occurred. Please check your details and try again.')
+    
+    else: 
         form = RegistrationForm()
 
     return render(request, 'attendance/registration.html', {'form': form})
@@ -236,14 +246,15 @@ def lecturer_registration(request):
     return render(request, 'attendance/lecturer_registration.html', {'form': form})
     
 @login_required
-@user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
+@user_passes_test(is_lecturer)
 def add_course(request):
-
     if request.method == 'POST':
         form = CourseForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Course has been successfully added.')
+            new_course = form.save(commit=False)
+            new_course.lecturer = request.user
+            new_course.save()
+            messages.success(request, f"Course '{new_course.course_name}' created successfully!")
             return redirect('lecturer_dashboard')
     else:
         form = CourseForm()
@@ -255,7 +266,7 @@ def add_course(request):
 @user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
 def lecturer_dashboard(request):
 
-    courses = Course.objects.all().order_by('course_name')
+    courses = Course.objects.filter(lecturer=request.user).order_by('course_name')
     student_count = Student.objects.count()
     context = {
         'courses': courses,
