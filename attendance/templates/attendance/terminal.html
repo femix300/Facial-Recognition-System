@@ -95,6 +95,14 @@
         border-color: rgba(255, 255, 255, 0.1) !important;
     }
     .log-panel .list-group-item small { color: #adb5bd !important; }
+    .result-overlay .message {
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin-top: 0.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        padding: 0 1rem;
+        animation: pop-in 0.5s ease 0.2s;
+    }
 </style>
 
 <div class="kiosk-wrapper">
@@ -113,6 +121,7 @@
                     <div id="result-overlay" class="result-overlay">
                         <div id="result-icon" class="icon"></div>
                         <h3 id="result-name" class="name"></h3>
+                        <p id="result-message" class="message"></p> 
                     </div>
                 </div>
                 
@@ -151,6 +160,7 @@
 
 <script type="module">
     // --- Get references to all UI elements ---
+  
     const video = document.getElementById('video');
     const statusDiv = document.getElementById('status');
     const attendanceLog = document.getElementById('attendance-log');
@@ -165,6 +175,12 @@
     const resultIcon = document.getElementById('result-icon');
     const resultName = document.getElementById('result-name');
     const sessionId = "{{ session_id }}";
+    
+    let blinkState = {
+        wasOpen: true,
+        detected: false
+    };
+    
     let isProcessing = false;
     let isTransitioning = false;
 
@@ -173,6 +189,7 @@
         BLINK: {
             instruction: "Please Blink Your Eyes",
             iconId: "blink-icon",
+            
             detectionFunction: (landmarks) => {
                 const leftEyeIndices = [33, 160, 158, 133, 153, 144];
                 const rightEyeIndices = [362, 385, 387, 263, 373, 380];
@@ -180,11 +197,21 @@
                     const p1 = landmarks[eyeIndices[3]], p2 = landmarks[eyeIndices[1]], p3 = landmarks[eyeIndices[2]], p4 = landmarks[eyeIndices[0]], p5 = landmarks[eyeIndices[5]], p6 = landmarks[eyeIndices[4]];
                     const verDist = Math.hypot(p2.y - p6.y, p2.x - p6.x) + Math.hypot(p3.y - p5.y, p3.x - p5.x);
                     const horDist = Math.hypot(p1.y - p4.y, p1.x - p4.x);
-                    if (horDist === 0) return 0;
-                    return verDist / (2.0 * horDist);
+                    return (horDist === 0) ? 0 : verDist / (2.0 * horDist);
                 };
+                
                 const avgEAR = (getEAR(leftEyeIndices) + getEAR(rightEyeIndices)) / 2.0;
-                return avgEAR < 0.25;
+                const isClosed = avgEAR < 0.23; 
+    
+                // State logic: if eyes were open and are now closed, it's a blink.
+                if (blinkState.wasOpen && isClosed) {
+                    blinkState.detected = true;
+                }
+    
+                
+                blinkState.wasOpen = !isClosed;
+                
+                return blinkState.detected;
             }
         },
         MOUTH_OPEN: {
@@ -234,6 +261,7 @@
     function startLivenessCheck() {
         isProcessing = false;
         resultOverlay.classList.remove('show');
+        blinkState = { wasOpen: true, detected: false };
         generateChallengeSequence();
         updateInstruction();
     }
@@ -342,28 +370,35 @@
     }
 
     function handleApiResponse(data) {
-        let overlayColor, iconClass, studentName;
+        let overlayColor, iconClass, studentName, messageText = '';
+    
         if (data.status === 'success') {
             overlayColor = 'var(--success-color)';
             iconClass = 'bi bi-check-circle-fill text-success';
             studentName = data.student_name;
-            updateLog(data.student_name, data.matric_number, data.timestamp);
+            messageText = `Matric: ${data.matric_number}`;
         } else if (data.status === 'already_marked') {
             overlayColor = 'var(--warning-color)';
             iconClass = 'bi bi-info-circle-fill text-warning';
-            studentName = `${data.student_name} (Already Marked)`;
+            studentName = data.student_name;
+            messageText = "Already marked for this session.";
         } else {
             overlayColor = 'var(--error-color)';
             iconClass = 'bi bi-x-circle-fill text-danger';
-            studentName = data.message || "Verification Failed";
+            studentName = "Verification Failed";
+            messageText = data.message || "An unknown error occurred.";
         }
-        
+    
+        // Clear previous message
+        document.getElementById('result-message').textContent = '';
+    
         cameraContainer.style.borderColor = overlayColor;
         resultIcon.className = 'icon ' + iconClass;
         resultName.textContent = studentName;
+        document.getElementById('result-message').textContent = messageText; // Set the new message
         resultOverlay.classList.add('show');
-        
-        setTimeout(startLivenessCheck, 3500);
+    
+        setTimeout(startLivenessCheck, 4000); // Increased timeout slightly
     }
 
     function updateLog(studentName, matricNumber, timestamp) {

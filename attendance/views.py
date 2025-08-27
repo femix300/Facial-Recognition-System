@@ -14,6 +14,7 @@ import json
 import tempfile
 from datetime import date
 import cv2
+import logging
 import numpy as np
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.pagesizes import letter
@@ -22,6 +23,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from .models import Student, Course, AttendanceSession, AttendanceRecord
 from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm
 
+
+logger = logging.getLogger(__name__)
 
 HAAR_CASCADE_PATH = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 
@@ -339,22 +342,30 @@ def export_session_pdf(request, session_id):
 @user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
 @login_required
 def process_frame(request):
-
+    """
+    Processes an image frame from the attendance terminal to recognize a student's face,
+    and marks them as present for the current session.
+    """
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
     try:
+      
         data = json.loads(request.body)
         session_id = data.get('session_id')
-        session = get_object_or_404(AttendanceSession, id=session_id)
-        
-
         image_data_url = data.get('image')
-        format, imgstr = image_data_url.split(';base64,')
+
+        if not session_id or not image_data_url:
+            return JsonResponse({'status': 'error', 'message': 'Missing session_id or image data.'}, status=400)
+
+        session = get_object_or_404(AttendanceSession, id=session_id)
+
+        _format, imgstr = image_data_url.split(';base64,')
         image_data = base64.b64decode(imgstr)
         nparr = np.frombuffer(image_data, np.uint8)
-        gray = cv2.cvtColor(cv2.imdecode(nparr, cv2.IMREAD_COLOR), cv2.COLOR_BGR2GRAY)
-        
+        # Using IMREAD_GRAYSCALE is more direct and efficient
+        gray = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+
         face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
@@ -364,28 +375,47 @@ def process_frame(request):
         x, y, w, h = faces[0]
         face_roi = gray[y:y+h, x:x+w]
 
-        students_data = Student.objects.values('id', 'lbph_model_data')
+
+        students = Student.objects.all()
         
-        for student_data in students_data:
-            model_b64 = student_data['lbph_model_data']
-            with io.BytesIO(base64.b64decode(model_b64)) as mem_buffer:
+        for student in students:
+            model_b64 = student.lbph_model_data
+            if not model_b64:
+                continue
+
+            with tempfile.NamedTemporaryFile(delete=True, suffix='.yml') as temp_f:
+                temp_f.write(base64.b64decode(model_b64))
+                temp_f.flush()
+                
                 recognizer = cv2.face.LBPHFaceRecognizer_create()
-                recognizer.read(mem_buffer)
+                recognizer.read(temp_f.name)
             
-            label, confidence = recognizer.predict(face_roi)
+                label, confidence = recognizer.predict(face_roi)
 
-            if confidence < 65:
-                matched_student = get_object_or_404(Student, id=student_data['id'])
-                record, created = AttendanceRecord.objects.get_or_create(student=matched_student, session=session)
 
-                if created:
-                    return JsonResponse({'status': 'success', 'student_name': matched_student.user.get_full_name(), 'matric_number': matched_student.matric_number, 'timestamp': timezone.now().strftime('%I:%M:%S %p')})
-                else:
-                    return JsonResponse({'status': 'already_marked', 'student_name': matched_student.user.get_full_name()})
+                if confidence < 65:
+                    
+                    record, created = AttendanceRecord.objects.get_or_create(student=student, session=session)
+
+                    if created:
+                        return JsonResponse({
+                            'status': 'success',
+                            'student_name': student.user.get_full_name(),
+                            'matric_number': student.matric_number,
+                            'timestamp': timezone.now().strftime('%I:%M:%S %p')
+                        })
+                    else:
+                        return JsonResponse({
+                            'status': 'already_marked',
+                            'student_name': student.user.get_full_name()
+                        })
+        
         
         return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
 
-    except Exception:
+    except Exception as e:
+        
+        logger.error(f"An error occurred in process_frame: {e}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
         
         
