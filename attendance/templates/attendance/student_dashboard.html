@@ -11,128 +11,204 @@
     :root {
         --primary-color: #0056b3;
         --success-color: #28a745;
-        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+        --body-bg: #f8f9fa; /* A light grey background to make cards pop */
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --card-radius: 0.75rem;
     }
-    body, .card, .btn, .table {
+    body {
+        background-color: var(--body-bg);
         font-family: 'Poppins', sans-serif;
     }
+    .card {
+        border: none;
+        border-radius: var(--card-radius);
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Profile Card Styling */
     .profile-card {
         background: linear-gradient(135deg, var(--primary-color), #007bff);
         color: white;
-        border: none;
-        border-radius: 0.75rem;
     }
+    .profile-card .icon {
+        background: rgba(255, 255, 255, 0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-card .icon i {
+        font-size: 3rem;
+        color: #fff;
+    }
+
+    /* Stat Card Styling */
     .stat-card {
-        border-radius: 0.75rem;
-        box-shadow: var(--card-shadow);
-        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card .stat-icon {
+        position: absolute;
+        right: -15px;
+        bottom: -15px;
+        font-size: 4.5rem;
+        color: var(--primary-color);
+        opacity: 0.15;
+    }
+    .stat-card .display-4 {
+        color: var(--primary-color);
     }
     
+    /* Calendar Styling & Overflow Fix */
+    .calendar-wrapper {
+        overflow-x: auto; /* This is the fix! Allows horizontal scrolling on small screens */
+        padding-bottom: 1rem;
+    }
     .calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 0.5rem;
+        min-width: 450px; /* Ensures calendar days don't get too squished */
         text-align: center;
     }
-    .calendar-day, .calendar-header {
-        padding: 0.75rem 0.25rem;
+    .calendar-header {
         font-weight: 600;
+        color: #6c757d;
+        padding: 0.5rem 0;
     }
     .calendar-day {
-        background-color: #f0f0f0;
+        font-weight: 500;
         border-radius: 0.5rem;
-        opacity: 0.5;
+        padding: 0.75rem 0.25rem;
+        background-color: #e9ecef;
+        opacity: 0.6;
+        transition: all 0.2s ease;
     }
     .calendar-day.current-month {
-        background-color: #ffffff;
+        background-color: #fff;
         opacity: 1;
+        cursor: pointer;
+    }
+    .calendar-day.current-month:hover {
+        background-color: #f0f0f0;
     }
     .calendar-day.attended {
         background-color: var(--success-color);
         color: white;
+        font-weight: 700;
     }
     .calendar-day.today {
-        border: 2px solid var(--primary-color);
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    /* Table Styling */
+    .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .table tbody tr:nth-child(odd) {
+        background-color: #f8f9fa;
     }
 </style>
 
-<div class="container mt-4">
-    <div class="mb-4">
+<div class="container my-5">
+    <div class="mb-5">
         <h1 class="display-5 fw-bold">My Dashboard</h1>
         <p class="text-muted fs-5">Welcome back, {{ user.first_name }}!</p>
     </div>
 
-    <div class="row">
-        <div class="col-lg-7">
-            <div class="card profile-card shadow-sm mb-4 h-100">
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card profile-card mb-4">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <div class="me-4 d-none d-sm-block">
-                         <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+                    <div class="icon me-4 d-none d-sm-flex">
+                         <i class="bi bi-person-fill"></i>
                     </div>
                     <div>
                         <h2 class="card-title text-white mb-1">{{ student.user.get_full_name }}</h2>
-                        <p class="mb-1"><i class="bi bi-card-text me-2"></i><strong>Matric No:</strong> {{ student.matric_number }}</p>
-                        <p class="mb-0"><i class="bi bi-envelope-fill me-2"></i><strong>Email:</strong> {{ student.user.email }}</p>
+                        <p class="mb-1 opacity-75"><i class="bi bi-card-text me-2"></i><strong>Matric No:</strong> {{ student.matric_number }}</p>
+                        <p class="mb-0 opacity-75"><i class="bi bi-envelope-fill me-2"></i><strong>Email:</strong> {{ student.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-white border-0 py-3">
+                    <h4 class="mb-0">Attendance Calendar: {{ today|date:"F Y" }}</h4>
+                </div>
+                <div class="card-body calendar-wrapper">
+                    <div class="calendar">
+                        {% for day_name in day_headers %}
+                            <div class="calendar-header">{{ day_name }}</div>
+                        {% endfor %}
+                        
+                        {% for day_date in month_days %}
+                            <div class="calendar-day 
+                                {% if day_date.month == today.month %}current-month{% endif %}
+                                {% if day_date.day in attended_days_set and day_date.month == today.month %}attended{% endif %}
+                                {% if day_date == today %}today{% endif %}"
+                                data-bs-toggle="tooltip" title="{% if day_date.day in attended_days_set and day_date.month == today.month %}Present{% else %}Absent{% endif %}">
+                                
+                                {% if day_date.month == today.month %}{{ day_date.day }}{% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="row">
-                <div class="col-6 mb-4"><div class="card stat-card h-100 text-center"><div class="card-body"><h6 class="text-muted">Total Attended</h6><p class="display-4 fw-bold mb-0 text-primary">{{ records.count }}</p></div></div></div>
-                <div class="col-6 mb-4"><div class="card stat-card h-100 text-center"><div class="card-body"><h6 class="text-muted">This Month</h6><p class="display-4 fw-bold mb-0 text-success">{{ attendance_this_month }}</p></div></div></div>
+
+        <div class="col-xl-4">
+            <div class="card stat-card mb-4">
+                <div class="card-body text-center p-4">
+                    <h6 class="text-muted mb-3">Total Classes Attended</h6>
+                    <p class="display-4 fw-bold mb-0">{{ records.count }}</p>
+                    <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="card-body text-center p-4">
+                    <h6 class="text-muted mb-3">Attendance This Month</h6>
+                    <p class="display-4 fw-bold mb-0 text-success">{{ attendance_this_month }}</p>
+                    <div class="stat-icon"><i class="bi bi-calendar-month"></i></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white border-0">
-            <h3 class="mb-0">Attendance Calendar: {{ today|date:"F Y" }}</h3>
-        </div>
-        <div class="card-body">
-        <div class="calendar">
-            {% for day_name in day_headers %}
-                <div class="calendar-header">{{ day_name }}</div>
-            {% endfor %}
-            
-            {% for day_date in month_days %}
-                <div class="calendar-day 
-                    {% if day_date.month == today.month %}current-month{% endif %}
-                    {% if day_date.day in attended_days_set and day_date.month == today.month %}attended{% endif %}
-                    {% if day_date == today %}today{% endif %}"
-                    data-bs-toggle="tooltip" title="{% if day_date.day in attended_days_set and day_date.month == today.month %}Present{% else %}Absent{% endif %}">
-                    
-                    {% if day_date.month == today.month %}{{ day_date.day }}{% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <h2 class="mb-4">Detailed History</h2>
-    <div class="card shadow-sm">
-        <div class="card-header bg-white border-0">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by course name or date...">
+    <div class="card mt-5">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0">Detailed History</h4>
+            <input type="text" id="searchInput" class="form-control" style="max-width: 300px;" placeholder="Search records...">
         </div>
         <div class="card-body p-0">
              {% if records %}
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" id="attendanceTable">
-                        <thead><tr><th class="ps-4">Course Name</th><th>Course Code</th><th>Date</th><th>Time Marked</th></tr></thead>
+                        <thead class="table-light"><tr><th class="ps-4">Course Name</th><th>Course Code</th><th>Date</th><th class="pe-4">Time Marked</th></tr></thead>
                         <tbody>
                             {% for record in records %}
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ record.session.course.course_name }}</td>
                                     <td>{{ record.session.course.course_code }}</td>
                                     <td>{{ record.session.created_at|date:"D, M d, Y" }}</td>
-                                    <td>{{ record.timestamp|time:"h:i:s A" }}</td>
+                                    <td class="pe-4">{{ record.timestamp|time:"h:i A" }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             {% else %}
-                <div class="empty-state">
-                    <div class="icon"><i class="bi bi-journal-x"></i></div>
+                <div class="text-center p-5">
+                    <i class="bi bi-journal-x" style="font-size: 4rem; color: #6c757d;"></i>
                     <h3 class="fw-bold mt-3">No Attendance Records Yet</h3>
                     <p class="text-muted fs-5">Your history will appear here once you attend a class.</p>
                 </div>
@@ -144,30 +220,33 @@
 
 {% block scripts %}
 <script>
-    
+    // Initialize Bootstrap Tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl)
     });
 
-    
+    // Table Search Filter Logic
     const searchInput = document.getElementById('searchInput');
     const table = document.getElementById('attendanceTable');
-    const rows = table.getElementsByTagName('tr');
+    // Check if table exists before adding event listener
+    if (table) {
+        const rows = table.getElementsByTagName('tr');
 
-    searchInput.addEventListener('keyup', function() {
-        const filter = searchInput.value.toLowerCase();
-        for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
-            let cells = rows[i].getElementsByTagName('td');
-            let found = false;
-            for (let j = 0; j < cells.length; j++) {
-                if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
-                    found = true;
-                    break;
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                let cells = rows[i].getElementsByTagName('td');
+                let found = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j] && cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
                 }
+                rows[i].style.display = found ? '' : 'none';
             }
-            rows[i].style.display = found ? '' : 'none';
-        }
-    });
+        });
+    }
 </script>
 {% endblock %}
