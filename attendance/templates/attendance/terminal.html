@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-
     :root {
         --primary-color: #0d6efd;
         --success-color: #198754;
@@ -43,6 +42,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        text-align: center;
         transition: all 0.5s ease-in-out;
     }
     
@@ -56,12 +56,10 @@
     @keyframes turn-head-animation { 0%, 100% { transform: translateX(0) scaleX(1); } 25% { transform: translateX(-15px) scaleX(0.9); } 75% { transform: translateX(15px) scaleX(0.9); } }
     #head-turn-icon { animation: turn-head-animation 2s infinite; font-size: 4rem; }
     
-  
     .progress-dots { display: flex; gap: 0.75rem; margin-top: 1rem; height: 16px; }
     .dot { width: 16px; height: 16px; background-color: rgba(255,255,255,0.3); border-radius: 50%; transition: background-color 0.5s ease; }
     .dot.completed { background-color: #ffffff; }
 
-    
     .result-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -75,13 +73,29 @@
         transition: opacity 0.5s ease, visibility 0.5s ease;
         border-radius: 50%;
         backdrop-filter: blur(5px);
+        text-align: center;
     }
     .result-overlay.show { opacity: 1; visibility: visible; }
-    .result-overlay .icon { font-size: 6rem; animation: pop-in 0.5s ease; }
-    .result-overlay .name { font-size: 2rem; font-weight: 600; margin-top: 1rem; animation: pop-in 0.5s ease 0.1s; }
+    .result-overlay .icon {
+        font-size: 4.5rem;
+        animation: pop-in 0.5s ease;
+    }
+    .result-overlay .name {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+        animation: pop-in 0.5s ease 0.1s;
+    }
+    .result-overlay .message {
+        font-size: 1rem;
+        font-weight: 400;
+        margin-top: 0.25rem;
+        color: rgba(255, 255, 255, 0.7);
+        padding: 0 1rem;
+        animation: pop-in 0.5s ease 0.2s;
+    }
     @keyframes pop-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-  
     .log-panel {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -95,14 +109,6 @@
         border-color: rgba(255, 255, 255, 0.1) !important;
     }
     .log-panel .list-group-item small { color: #adb5bd !important; }
-    .result-overlay .message {
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin-top: 0.5rem;
-        color: rgba(255, 255, 255, 0.7);
-        padding: 0 1rem;
-        animation: pop-in 0.5s ease 0.2s;
-    }
 </style>
 
 <div class="kiosk-wrapper">
@@ -159,40 +165,43 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script type="module">
-    // --- Get references to all UI elements ---
   
     const video = document.getElementById('video');
     const statusDiv = document.getElementById('status');
-    const attendanceLog = document.getElementById('attendance-log');
-    const lastStudentSpan = document.getElementById('last-student');
+    const cameraContainer = document.getElementById('camera-container');
     const captureCanvas = document.getElementById('capture_canvas');
     const overlayCanvas = document.getElementById('overlay_canvas');
-    const cameraContainer = document.getElementById('camera-container');
-    const attendeeCount = document.getElementById('attendee_count');
     const canvasCtx = overlayCanvas.getContext('2d');
-    const progressDotsContainer = document.getElementById('progress-dots');
     const resultOverlay = document.getElementById('result-overlay');
     const resultIcon = document.getElementById('result-icon');
     const resultName = document.getElementById('result-name');
+    const progressDotsContainer = document.getElementById('progress-dots');
+    
+    // Attendance Log UI
+    const attendanceLog = document.getElementById('attendance-log');
+    const lastStudentSpan = document.getElementById('last-student');
+    const attendeeCount = document.getElementById('attendee_count');
+
     const sessionId = "{{ session_id }}";
     
-    let blinkState = {
-        wasOpen: true,
-        detected: false
-    };
-    
+    // State Management Variables
     let isProcessing = false;
     let isTransitioning = false;
-
-  
+    let blinkState = {
+        detected: false,
+        closedFrames: 0
+    };
+    
+    // LIVENESS CHALLENGES
     const challenges = {
         BLINK: {
             instruction: "Please Blink Your Eyes",
             iconId: "blink-icon",
-            
             detectionFunction: (landmarks) => {
                 const leftEyeIndices = [33, 160, 158, 133, 153, 144];
                 const rightEyeIndices = [362, 385, 387, 263, 373, 380];
+                
+                /
                 const getEAR = (eyeIndices) => {
                     const p1 = landmarks[eyeIndices[3]], p2 = landmarks[eyeIndices[1]], p3 = landmarks[eyeIndices[2]], p4 = landmarks[eyeIndices[0]], p5 = landmarks[eyeIndices[5]], p6 = landmarks[eyeIndices[4]];
                     const verDist = Math.hypot(p2.y - p6.y, p2.x - p6.x) + Math.hypot(p3.y - p5.y, p3.x - p5.x);
@@ -201,15 +210,18 @@
                 };
                 
                 const avgEAR = (getEAR(leftEyeIndices) + getEAR(rightEyeIndices)) / 2.0;
-                const isClosed = avgEAR < 0.23; 
-    
-                // State logic: if eyes were open and are now closed, it's a blink.
-                if (blinkState.wasOpen && isClosed) {
-                    blinkState.detected = true;
+                const isClosed = avgEAR < 0.23; // Threshold for considering the eye closed
+        
+                if (isClosed) {
+                    blinkState.closedFrames++;
+                } else {
+                    // A valid blink is when eyes were closed for a few frames and are now open
+                    if (blinkState.closedFrames > 1 && blinkState.closedFrames < 10) {
+                        blinkState.detected = true;
+                    }
+                    // Reset counter whenever eyes are open
+                    blinkState.closedFrames = 0;
                 }
-    
-                
-                blinkState.wasOpen = !isClosed;
                 
                 return blinkState.detected;
             }
@@ -218,18 +230,13 @@
             instruction: "Please Open Your Mouth",
             iconId: "mouth-icon",
             detectionFunction: (landmarks) => {
-                const topLip = landmarks[13];
-                const bottomLip = landmarks[14];
-                const leftCorner = landmarks[61];
-                const rightCorner = landmarks[291];
-        
+                const topLip = landmarks[13], bottomLip = landmarks[14];
+                const leftCorner = landmarks[61], rightCorner = landmarks[291];
                 const verticalDist = Math.hypot(topLip.y - bottomLip.y, topLip.x - bottomLip.x);
                 const horizontalDist = Math.hypot(leftCorner.y - rightCorner.y, leftCorner.x - rightCorner.x);
-                
                 if (horizontalDist === 0) return false;
-        
-                const mar = verticalDist / horizontalDist;
-                return mar > 0.5; // Threshold for a clearly open mouth
+                const mar = verticalDist / horizontalDist; // Mouth Aspect Ratio
+                return mar > 0.5;
             }
         },
         TURN_HEAD: {
@@ -237,7 +244,9 @@
             iconId: "head-turn-icon",
             detectionFunction: (landmarks) => {
                 const nose = landmarks[1], leftEdge = landmarks[234], rightEdge = landmarks[454];
+                // Compare distance from nose to left/right edges of the face
                 const turnRatio = Math.abs(nose.x - leftEdge.x) / Math.abs(nose.x - rightEdge.x);
+                // A significant imbalance indicates a head turn
                 return turnRatio > 2.0 || (1 / turnRatio) > 2.0;
             }
         }
@@ -246,34 +255,43 @@
     let challengeSequence = [];
     let currentChallengeIndex = 0;
 
-    // --- 2. STATE MACHINE & UI FUNCTIONS ---
+    // CORE LOGIC & STATE MACHINE
     function generateChallengeSequence() {
         const challengeKeys = Object.keys(challenges);
+        
         for (let i = challengeKeys.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [challengeKeys[i], challengeKeys[j]] = [challengeKeys[j], challengeKeys[i]];
         }
-        const numChallenges = Math.floor(Math.random() * 2) + 1; // 1 or 2 challenges
+        
+        const numChallenges = Math.floor(Math.random() * 2) + 1; 
         challengeSequence = challengeKeys.slice(0, numChallenges);
         currentChallengeIndex = 0;
     }
 
     function startLivenessCheck() {
         isProcessing = false;
+        isTransitioning = false;
         resultOverlay.classList.remove('show');
-        blinkState = { wasOpen: true, detected: false };
+        
+        
+        blinkState = { detected: false, closedFrames: 0 }; 
+        
         generateChallengeSequence();
         updateInstruction();
     }
 
     function updateInstruction() {
         if (currentChallengeIndex >= challengeSequence.length) return;
+        
         const currentChallengeKey = challengeSequence[currentChallengeIndex];
         statusDiv.textContent = challenges[currentChallengeKey].instruction;
         
+        // Display the icon for the current challenge
         document.querySelectorAll('.challenge-icon').forEach(icon => icon.classList.remove('active'));
         document.getElementById(challenges[currentChallengeKey].iconId).classList.add('active');
 
+        // Update progress dots
         progressDotsContainer.innerHTML = '';
         for (let i = 0; i < challengeSequence.length; i++) {
             const dot = document.createElement('div');
@@ -282,14 +300,22 @@
         }
     }
 
-  
+    // --- 4. MEDIAPIPE & CAMERA SETUP ---
     const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-    faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
     faceMesh.onResults(onResults);
     
-    const camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
+    const camera = new Camera(video, {
+        onFrame: async () => { await faceMesh.send({image: video}); },
+        width: 640,
+        height: 480
+    });
     
-
     camera.start()
         .then(() => {
             overlayCanvas.width = video.videoWidth;
@@ -306,7 +332,6 @@
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     
-        // Block processing during transitions or when sending data
         if (isProcessing || isTransitioning) { 
             canvasCtx.restore(); 
             return; 
@@ -318,27 +343,31 @@
             cameraContainer.style.borderColor = 'var(--primary-color)';
     
             const currentChallengeKey = challengeSequence[currentChallengeIndex];
-            if (!currentChallengeKey) { canvasCtx.restore(); return; }
+            if (!currentChallengeKey) {
+                canvasCtx.restore();
+                return;
+            }
             const challenge = challenges[currentChallengeKey];
     
             if (challenge.detectionFunction(landmarks)) {
-                isTransitioning = true; // Start the transition to block other actions
+                isTransitioning = true;
                 currentChallengeIndex++;
     
                 if (currentChallengeIndex >= challengeSequence.length) {
-                    isProcessing = true; 
+                    // All challenges passed
+                    isProcessing = true;
                     isTransitioning = false;
                     statusDiv.textContent = 'Liveness Confirmed!';
                     drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: 'var(--success-color)', lineWidth: 2});
                     cameraContainer.style.borderColor = 'var(--success-color)';
                     setTimeout(captureAndSendImage, 500);
                 } else {
-                    // Show temporary feedback, then show the next instruction
+                    // One challenge passed, move to the next
                     statusDiv.textContent = '✅ Great! Next...';
                     setTimeout(() => {
                         updateInstruction();
-                        isTransitioning = false; // End transition, ready for next detection
-                    }, 1200); // 1.2 second pause for user to see feedback
+                        isTransitioning = false;
+                    }, 1200);
                 }
             }
         } else {
@@ -347,10 +376,12 @@
         canvasCtx.restore();
     }
 
+    // API COMMUNICATION
     function captureAndSendImage() {
         captureCanvas.width = video.videoWidth; 
         captureCanvas.height = video.videoHeight;
         const ctx = captureCanvas.getContext('2d');
+        // Flip the image horizontally to match the user's view
         ctx.translate(video.videoWidth, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
@@ -358,7 +389,10 @@
 
         fetch("{% url 'process_frame_api' %}", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'}, // Good practice to include CSRF token
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
             body: JSON.stringify({ image: imageData, session_id: sessionId })
         })
         .then(response => response.json())
@@ -377,11 +411,13 @@
             iconClass = 'bi bi-check-circle-fill text-success';
             studentName = data.student_name;
             messageText = `Matric: ${data.matric_number}`;
+            updateLog(data.student_name, data.matric_number, data.timestamp);
         } else if (data.status === 'already_marked') {
             overlayColor = 'var(--warning-color)';
             iconClass = 'bi bi-info-circle-fill text-warning';
             studentName = data.student_name;
             messageText = "Already marked for this session.";
+            updateLog(data.student_name, data.matric_number || 'N/A', 'Marked'); 
         } else {
             overlayColor = 'var(--error-color)';
             iconClass = 'bi bi-x-circle-fill text-danger';
@@ -389,16 +425,13 @@
             messageText = data.message || "An unknown error occurred.";
         }
     
-        // Clear previous message
-        document.getElementById('result-message').textContent = '';
-    
         cameraContainer.style.borderColor = overlayColor;
         resultIcon.className = 'icon ' + iconClass;
         resultName.textContent = studentName;
-        document.getElementById('result-message').textContent = messageText; // Set the new message
+        document.getElementById('result-message').textContent = messageText;
         resultOverlay.classList.add('show');
     
-        setTimeout(startLivenessCheck, 4000); // Increased timeout slightly
+        setTimeout(startLivenessCheck, 4000);
     }
 
     function updateLog(studentName, matricNumber, timestamp) {
