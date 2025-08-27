@@ -165,7 +165,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script type="module">
-  
+
     const video = document.getElementById('video');
     const statusDiv = document.getElementById('status');
     const cameraContainer = document.getElementById('camera-container');
@@ -201,7 +201,7 @@
                 const leftEyeIndices = [33, 160, 158, 133, 153, 144];
                 const rightEyeIndices = [362, 385, 387, 263, 373, 380];
                 
-                /
+                
                 const getEAR = (eyeIndices) => {
                     const p1 = landmarks[eyeIndices[3]], p2 = landmarks[eyeIndices[1]], p3 = landmarks[eyeIndices[2]], p4 = landmarks[eyeIndices[0]], p5 = landmarks[eyeIndices[5]], p6 = landmarks[eyeIndices[4]];
                     const verDist = Math.hypot(p2.y - p6.y, p2.x - p6.x) + Math.hypot(p3.y - p5.y, p3.x - p5.x);
