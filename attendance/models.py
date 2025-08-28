@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+import uuid 
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -44,3 +45,12 @@ class AttendanceRecord(models.Model):
 
     def __str__(self):
         return f"{self.student} marked for {self.session.course.course_code} - {self.status}"
+        
+        
+class PasswordReset(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    reset_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    created_when = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Password reset for {self.user.username}"

@@ -66,12 +66,19 @@
         color: var(--primary-color);
     }
 
-    /* Enhanced Calendar Styling */
+    /* --- FIX FOR CALENDAR OVERFLOW --- */
+    .calendar-wrapper {
+        overflow-x: auto; /* Allows horizontal scrolling only if content overflows */
+        padding-bottom: 10px; /* Adds some space for the scrollbar */
+    }
+    /* --- END FIX --- */
+
     .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 0.5rem;
         justify-items: center;
+        min-width: 320px; /* Prevents the calendar from getting too squished */
     }
     .calendar-header {
         text-align: center;
@@ -144,22 +151,24 @@
             <div class="card">
                 <div class="card-body p-4">
                     <h4 class="text-center fw-bold mb-4">{{ today|date:"F Y" }}</h4>
-                    <div class="calendar-grid">
-                        {% for header in day_headers %}
-                            <div class="calendar-header">{{ header }}</div>
-                        {% endfor %}
+                    <div class="calendar-wrapper">
+                        <div class="calendar-grid">
+                            {% for header in day_headers %}
+                                <div class="calendar-header">{{ header }}</div>
+                            {% endfor %}
 
-                        {% for day in month_days %}
-                            <div class="calendar-day
-                                {% if day.month == today.month %}day-current-month{% else %}day-other-month{% endif %}
-                                {% if day == today %}day-today{% endif %}
-                                {% if day.month == today.month and day.day in attended_days_set %}day-attended{% endif %}"
-                                data-bs-toggle="tooltip" title="{% if day.month == today.month %}{% if day.day in attended_days_set %}Present{% else %}Absent{% endif %}{% endif %}">
-                                {{ day.day }}
-                            </div>
-                        {% endfor %}
+                            {% for day in month_days %}
+                                <div class="calendar-day
+                                    {% if day.month == today.month %}day-current-month{% else %}day-other-month{% endif %}
+                                    {% if day == today %}day-today{% endif %}
+                                    {% if day.month == today.month and day.day in attended_days_set %}day-attended{% endif %}"
+                                    data-bs-toggle="tooltip" title="{% if day.month == today.month %}{% if day.day in attended_days_set %}Present{% else %}Absent{% endif %}{% endif %}">
+                                    {{ day.day }}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+                    </div>
             </div>
         </div>
 

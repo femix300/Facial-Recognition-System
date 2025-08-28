@@ -1,7 +1,8 @@
 from django import forms
-from .models import Course
+from .models import Course, Student
 from django.utils import timezone
 import datetime
+from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
     USER_TYPE_CHOICES = (
@@ -27,12 +28,59 @@ class RegistrationForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email Address', 'class': 'form-control'}))
     matric_number = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Matriculation Number', 'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'}))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'form-control'}))
+    face_samples = forms.CharField(widget=forms.HiddenInput())
+
+    def clean_email(self):
+    
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email address already exists.")
+        return email
+
+    def clean_matric_number(self):
+        
+        matric_number = self.cleaned_data.get('matric_number')
+        if Student.objects.filter(matric_number__iexact=matric_number).exists():
+            raise forms.ValidationError("A student with this Matriculation Number is already registered.")
+        return matric_number
+
+    def clean(self):
+      
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match. Please try again.")
+        
+        return cleaned_data
+    
     
 class LecturerRegistrationForm(forms.Form):
     first_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'First Name', 'class': 'form-control'}))
     last_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Last Name', 'class': 'form-control'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Official Email Address', 'class': 'form-control'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email Address', 'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'}))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'form-control'}))
+
+    def clean_email(self):
+      
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email address already exists.")
+        return email
+
+    def clean(self):
+        
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match. Please try again.")
+
+        return cleaned_data
 
 
 class CourseForm(forms.ModelForm):

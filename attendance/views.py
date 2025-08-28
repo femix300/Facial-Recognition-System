@@ -7,9 +7,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
-from django.contrib.auth import authenticate, login, logout, views as auth_views
+from django.contrib.auth import authenticate, login, logout
+from .models import PasswordReset 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse_lazy
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.conf import settings
 import io
 import base64
 import json
@@ -22,7 +26,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-from .models import Student, Course, AttendanceSession, AttendanceRecord
+from .models import Student, Course, AttendanceSession, AttendanceRecord, PasswordReset
 from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm, SessionCreationForm
 
 
@@ -89,59 +93,49 @@ def home(request):
 
 
 def student_registration(request):
+    """
+    Handles new student registration by leveraging form validation and ensuring
+    database operations are atomic and secure.
+    """
     if request.user.is_authenticated:
         return redirect('home')
 
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            matric_number = form.cleaned_data['matric_number']
-            
-            if User.objects.filter(username=email).exists():
-                messages.error(request, 'A user with this email already exists.')
-                return render(request, 'attendance/registration.html', {'form': form})
-            if Student.objects.filter(matric_number=matric_number).exists():
-                messages.error(request, 'A student with this matriculation number already exists.')
-                return render(request, 'attendance/registration.html', {'form': form})
-
-            face_samples_json = request.POST.get('face_samples')
-            if not face_samples_json:
-                messages.error(request, 'Face samples were not provided. Please complete the face capture step.')
-                return render(request, 'attendance/registration.html', {'form': form})
-
             try:
-                face_samples = json.loads(face_samples_json)
-                
+
                 with transaction.atomic():
                     user = User.objects.create_user(
-                        username=email,
+                        username=form.cleaned_data['email'],
+                        email=form.cleaned_data['email'],
                         password=form.cleaned_data['password'],
                         first_name=form.cleaned_data['first_name'],
-                        last_name=form.cleaned_data['last_name'],
-                        email=email
+                        last_name=form.cleaned_data['last_name']
                     )
-                    
-                    # Train the model AFTER user creation (now user.id exists)
-                    model_b64 = train_lbph_model_from_samples(face_samples, user.id)
+                    face_samples_b64 = json.loads(form.cleaned_data['face_samples'])
+                    model_data = train_lbph_model_from_samples(face_samples_b64, user.id)
                     
                     Student.objects.create(
-                        user=user, 
-                        matric_number=matric_number, 
-                        lbph_model_data=model_b64
+                        user=user,
+                        matric_number=form.cleaned_data['matric_number'],
+                        lbph_model_data=model_data
                     )
                 
-                messages.success(request, 'Registration successful! You can now log in.')
+                messages.success(request, 'Student account created successfully! You can now log in.')
                 return redirect('login')
+
             except ValueError as ve:
-                messages.error(request, f"Face recognition failed: {ve}. Please try again in better lighting and ensure your face is clear.")
+
+                messages.error(request, f"Face recognition setup failed: {ve}. Please try again in better lighting and ensure your face is clear.")
             except Exception as e:
+
                 logger.error(f"An unexpected error occurred during student registration: {e}")
-                messages.error(request, 'An unexpected error occurred. Please check your details and try again.')
+                messages.error(request, 'An unexpected server error occurred. Please try again.')
     
     else: 
-        form = RegistrationForm()
 
+        form = RegistrationForm()
     return render(request, 'attendance/registration.html', {'form': form})
 
 
@@ -149,12 +143,20 @@ def login_user(request):
     """Handles user login and redirects based on role (student or lecturer)."""
     if request.user.is_authenticated:
         return redirect('home')
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user_type = form.cleaned_data['user_type']
+
+            try:
+                user_obj = User.objects.get(username=email)
+            except User.DoesNotExist:
+            
+                messages.error(request, f"No account is registered with the email: {email}.")
+                return render(request, 'attendance/login.html', {'form': form})
 
             user = authenticate(request, username=email, password=password)
 
@@ -166,11 +168,13 @@ def login_user(request):
                     login(request, user)
                     return redirect('student_dashboard')
                 else:
-                    messages.error(request, f"You do not have permission to log in as a {user_type}.")
+                    messages.error(request, f"Your account does not have permission to log in as a {user_type}.")
             else:
-                messages.error(request, 'Invalid email or password.')
+
+                messages.error(request, 'Incorrect password. Please try again.')
     else:
         form = LoginForm()
+
     return render(request, 'attendance/login.html', {'form': form})
 
 
@@ -224,32 +228,23 @@ def student_dashboard(request):
 
 
 def lecturer_registration(request):
+    """Handles new lecturer registration using form validation."""
     if request.user.is_authenticated:
-        return redirect('home')
-
+        return redirect(home)
+        
     if request.method == 'POST':
         form = LecturerRegistrationForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            
-            if User.objects.filter(username=email).exists():
-                messages.error(request, 'A user with this email already exists.')
-                return redirect('lecturer_registration')
-            
-            try:
-
-                user = User.objects.create_user(
-                    username=email,
-                    password=form.cleaned_data['password'],
-                    first_name=form.cleaned_data['first_name'],
-                    last_name=form.cleaned_data['last_name'],
-                    email=email,
-                    is_staff=True
-                )
-                messages.success(request, 'Lecturer account created successfully. You can now log in.')
-                return redirect('login')
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
+            User.objects.create_user(
+                username=form.cleaned_data['email'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
+                first_name=form.cleaned_data['first_name'],
+                last_name=form.cleaned_data['last_name'],
+                is_staff=True
+            )
+            messages.success(request, 'Lecturer account created successfully! Please log in.')
+            return redirect('login')
     else:
         form = LecturerRegistrationForm()
 
@@ -368,7 +363,7 @@ def create_session(request, course_id):
 @user_passes_test(is_lecturer)
 def attendance_terminal(request, session_id):
     session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
-    return render(request, 'attendance/attendance_terminal.html', {'course': session.course, 'session_id': session.id})
+    return render(request, 'attendance/terminal.html', {'course': session.course, 'session_id': session.id})
 
 
 @login_required
@@ -545,3 +540,79 @@ def custom_404_view(request, exception):
 
 def custom_500_view(request):
     return render(request, '500.html', status=500)
+    
+
+def forgot_password(request):
+    """Handles the first step of password reset: sending the email."""
+    if request.method == "POST":
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email__iexact=email)
+            
+            new_password_reset = PasswordReset.objects.create(user=user)
+
+            password_reset_url = reverse('reset_password', kwargs={'reset_id': new_password_reset.reset_id})
+            full_reset_url = f'{request.scheme}://{request.get_host()}{password_reset_url}'
+
+            html_message = render_to_string('attendance/password_reset_email.html', {'reset_url': full_reset_url})
+            subject = "[Action Required] Reset Your Password for Smart Attendance System"
+            
+            email_msg = EmailMessage(subject, html_message, settings.EMAIL_HOST_USER, [user.email])
+            email_msg.content_subtype = "html"
+            email_msg.send()
+
+            messages.success(request, "A password reset link has been sent to your email.")
+            return redirect('password_reset_sent', reset_id=new_password_reset.reset_id)
+        except User.DoesNotExist:
+            messages.error(request, f"No user is registered with the email '{email}'.")
+            return redirect('forgot_password')
+
+    return render(request, 'attendance/forgot-password.html')
+
+
+def password_reset_sent(request, reset_id):
+    """Confirms that the password reset email has been sent."""
+    if not PasswordReset.objects.filter(reset_id=reset_id).exists():
+        messages.error(request, 'Invalid or expired reset link.')
+        return redirect('forgot_password')
+    return render(request, 'attendance/password-reset-sent.html')
+
+
+def reset_password(request, reset_id):
+    """Handles the actual password reset after the user clicks the email link."""
+    try:
+        password_reset_obj = PasswordReset.objects.get(reset_id=reset_id)
+        expiration_time = password_reset_obj.created_when + timedelta(minutes=10)
+
+        if timezone.now() > expiration_time:
+            messages.error(request, 'This password reset link has expired. Please request a new one.')
+            password_reset_obj.delete()
+            return redirect('forgot_password')
+
+        if request.method == "POST":
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirmPassword')
+
+            if password and password == confirm_password and len(password) >= 6:
+                user = password_reset_obj.user
+                user.set_password(password)
+                user.save()
+                password_reset_obj.delete()
+                return redirect('password_reset_complete')
+            else:
+                if password != confirm_password:
+                    messages.error(request, 'Passwords do not match. Please try again.')
+                if len(password) < 6:
+                    messages.error(request, 'Password must be at least 6 characters long.')
+                return redirect('reset_password', reset_id=reset_id)
+
+    except PasswordReset.DoesNotExist:
+        messages.error(request, 'The reset link is invalid or has already been used.')
+        return redirect('forgot_password')
+
+    return render(request, 'attendance/reset-password.html')
+
+
+def password_reset_complete(request):
+    """Displays a success message after the password has been reset."""
+    return render(request, 'attendance/password_reset_complete.html')
