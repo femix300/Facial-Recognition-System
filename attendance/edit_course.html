@@ -1,0 +1,29 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Edit Course{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 2.5rem;
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+</style>
+
+<div class="container my-5">
+    <div class="form-container">
+        <h1 class="text-center fw-bold mb-4">Edit '{{ course.course_name }}'</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                <a href="{% url 'lecturer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

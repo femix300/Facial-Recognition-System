@@ -10,8 +10,8 @@
 <style>
     :root {
         --primary-color: #0056b3;
-        --success-color: #28a745;
-        --body-bg: #f8f9fa; /* A light grey background to make cards pop */
+        --success-color: #198754;
+        --body-bg: #f8f9fa;
         --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         --card-radius: 0.75rem;
     }
@@ -65,58 +65,58 @@
     .stat-card .display-4 {
         color: var(--primary-color);
     }
-    
-    /* Calendar Styling & Overflow Fix */
-    .calendar-wrapper {
-        overflow-x: auto; /* This is the fix! Allows horizontal scrolling on small screens */
-        padding-bottom: 1rem;
-    }
-    .calendar {
+
+    /* Enhanced Calendar Styling */
+    .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 0.5rem;
-        min-width: 450px; /* Ensures calendar days don't get too squished */
-        text-align: center;
+        justify-items: center;
     }
     .calendar-header {
+        text-align: center;
         font-weight: 600;
         color: #6c757d;
-        padding: 0.5rem 0;
+        padding-bottom: 0.5rem;
     }
     .calendar-day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: 500;
-        border-radius: 0.5rem;
-        padding: 0.75rem 0.25rem;
-        background-color: #e9ecef;
-        opacity: 0.6;
+        border-radius: 50%;
+        height: 40px;
+        width: 40px;
         transition: all 0.2s ease;
     }
-    .calendar-day.current-month {
-        background-color: #fff;
-        opacity: 1;
+    .day-current-month {
         cursor: pointer;
+        background-color: #e9ecef;
     }
-    .calendar-day.current-month:hover {
-        background-color: #f0f0f0;
+    .day-current-month:hover {
+        background-color: #d8dde2;
     }
-    .calendar-day.attended {
-        background-color: var(--success-color);
+    .day-other-month {
+        color: #ced4da;
+    }
+    .day-today {
+        background-color: var(--primary-color);
         color: white;
         font-weight: 700;
     }
-    .calendar-day.today {
-        outline: 2px solid var(--primary-color);
-        outline-offset: 2px;
+    .day-attended {
+        background-color: var(--success-color) !important;
+        color: white;
+        font-weight: 700;
     }
 
     /* Table Styling */
     .table thead th {
-        background-color: #f8f9fa;
         font-weight: 600;
         border-bottom: 2px solid #dee2e6;
     }
-    .table tbody tr:nth-child(odd) {
-        background-color: #f8f9fa;
+    .table tbody tr:hover {
+        background-color: #eef2f9;
     }
 </style>
 
@@ -142,23 +142,20 @@
             </div>
 
             <div class="card">
-                <div class="card-header bg-white border-0 py-3">
-                    <h4 class="mb-0">Attendance Calendar: {{ today|date:"F Y" }}</h4>
-                </div>
-                <div class="card-body calendar-wrapper">
-                    <div class="calendar">
-                        {% for day_name in day_headers %}
-                            <div class="calendar-header">{{ day_name }}</div>
+                <div class="card-body p-4">
+                    <h4 class="text-center fw-bold mb-4">{{ today|date:"F Y" }}</h4>
+                    <div class="calendar-grid">
+                        {% for header in day_headers %}
+                            <div class="calendar-header">{{ header }}</div>
                         {% endfor %}
-                        
-                        {% for day_date in month_days %}
-                            <div class="calendar-day 
-                                {% if day_date.month == today.month %}current-month{% endif %}
-                                {% if day_date.day in attended_days_set and day_date.month == today.month %}attended{% endif %}
-                                {% if day_date == today %}today{% endif %}"
-                                data-bs-toggle="tooltip" title="{% if day_date.day in attended_days_set and day_date.month == today.month %}Present{% else %}Absent{% endif %}">
-                                
-                                {% if day_date.month == today.month %}{{ day_date.day }}{% endif %}
+
+                        {% for day in month_days %}
+                            <div class="calendar-day
+                                {% if day.month == today.month %}day-current-month{% else %}day-other-month{% endif %}
+                                {% if day == today %}day-today{% endif %}
+                                {% if day.month == today.month and day.day in attended_days_set %}day-attended{% endif %}"
+                                data-bs-toggle="tooltip" title="{% if day.month == today.month %}{% if day.day in attended_days_set %}Present{% else %}Absent{% endif %}{% endif %}">
+                                {{ day.day }}
                             </div>
                         {% endfor %}
                     </div>
@@ -193,13 +190,26 @@
              {% if records %}
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" id="attendanceTable">
-                        <thead class="table-light"><tr><th class="ps-4">Course Name</th><th>Course Code</th><th>Date</th><th class="pe-4">Time Marked</th></tr></thead>
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Course Name</th>
+                                <th>Course Code</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th class="pe-4">Time Marked</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {% for record in records %}
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ record.session.course.course_name }}</td>
                                     <td>{{ record.session.course.course_code }}</td>
                                     <td>{{ record.session.created_at|date:"D, M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge {% if record.status == 'on_time' %}text-bg-success{% else %}text-bg-warning{% endif %}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
                                     <td class="pe-4">{{ record.timestamp|time:"h:i A" }}</td>
                                 </tr>
                             {% endfor %}
@@ -220,22 +230,24 @@
 
 {% block scripts %}
 <script>
-    // Initialize Bootstrap Tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+    // Initialize Bootstrap Tooltips for the calendar
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
     });
 
     // Table Search Filter Logic
     const searchInput = document.getElementById('searchInput');
     const table = document.getElementById('attendanceTable');
-    // Check if table exists before adding event listener
+
     if (table) {
         const rows = table.getElementsByTagName('tr');
-
         searchInput.addEventListener('keyup', function() {
             const filter = searchInput.value.toLowerCase();
-            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+            // Loop through all table rows, and hide those who don't match the search query
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row <thead>
                 let cells = rows[i].getElementsByTagName('td');
                 let found = false;
                 for (let j = 0; j < cells.length; j++) {
@@ -244,7 +256,7 @@
                         break;
                     }
                 }
-                rows[i].style.display = found ? '' : 'none';
+                rows[i].style.display = found ? "" : "none";
             }
         });
     }

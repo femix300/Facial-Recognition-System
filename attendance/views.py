@@ -6,8 +6,10 @@ from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout
+from datetime import timedelta
+from django.contrib.auth import authenticate, login, logout, views as auth_views
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse_lazy
 import io
 import base64
 import json
@@ -21,7 +23,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from .models import Student, Course, AttendanceSession, AttendanceRecord
-from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm
+from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm, SessionCreationForm
 
 
 logger = logging.getLogger(__name__)
@@ -33,13 +35,11 @@ def is_lecturer(user):
     return user.is_staff
 
 
-def train_lbph_model_from_samples(face_samples_b64: list) -> str:
+def train_lbph_model_from_samples(face_samples_b64: list, user_id: int) -> str:
 
     face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
     
     face_samples = []
-
-    user_id = 1 
     ids = []
 
     for b64_img in face_samples_b64:
@@ -95,7 +95,6 @@ def student_registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-
             email = form.cleaned_data['email']
             matric_number = form.cleaned_data['matric_number']
             
@@ -113,8 +112,6 @@ def student_registration(request):
 
             try:
                 face_samples = json.loads(face_samples_json)
-
-                model_b64 = train_lbph_model_from_samples(face_samples)
                 
                 with transaction.atomic():
                     user = User.objects.create_user(
@@ -124,6 +121,10 @@ def student_registration(request):
                         last_name=form.cleaned_data['last_name'],
                         email=email
                     )
+                    
+                    # Train the model AFTER user creation (now user.id exists)
+                    model_b64 = train_lbph_model_from_samples(face_samples, user.id)
+                    
                     Student.objects.create(
                         user=user, 
                         matric_number=matric_number, 
@@ -147,16 +148,25 @@ def student_registration(request):
 def login_user(request):
     """Handles user login and redirects based on role (student or lecturer)."""
     if request.user.is_authenticated:
-        return redirect('home') 
+        return redirect('home')
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
+            user_type = form.cleaned_data['user_type']
+
             user = authenticate(request, username=email, password=password)
+
             if user is not None:
-                login(request, user)
-                return redirect('lecturer_dashboard' if user.is_staff else 'student_dashboard')
+                if user_type == 'lecturer' and user.is_staff:
+                    login(request, user)
+                    return redirect('lecturer_dashboard')
+                elif user_type == 'student' and not user.is_staff:
+                    login(request, user)
+                    return redirect('student_dashboard')
+                else:
+                    messages.error(request, f"You do not have permission to log in as a {user_type}.")
             else:
                 messages.error(request, 'Invalid email or password.')
     else:
@@ -260,123 +270,200 @@ def add_course(request):
         form = CourseForm()
     
     return render(request, 'attendance/add_course.html', {'form': form})
-
-
+    
 @login_required
-@user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
+@user_passes_test(is_lecturer)
 def lecturer_dashboard(request):
+    # Fetch courses with annotations for student and session counts
+    courses = Course.objects.filter(lecturer=request.user).annotate(
+        student_count=Count('attendancesession__records__student', distinct=True),  # Traverse relations: course <- session <- record -> student
+        session_count=Count('attendancesession')  # Direct reverse relation to sessions (distinct not needed here)
+    ).order_by('course_code')
 
-    courses = Course.objects.filter(lecturer=request.user).order_by('course_name')
-    student_count = Student.objects.count()
+    # Aggregate totals
+    total_courses = courses.count()
+    total_sessions = AttendanceSession.objects.filter(course__lecturer=request.user).count()
+    total_students = Student.objects.filter(records__session__course__lecturer=request.user).distinct().count()
+
     context = {
         'courses': courses,
-        'student_count': student_count,
+        'total_courses': total_courses,
+        'total_sessions': total_sessions,
+        'total_students': total_students,
     }
+    
     return render(request, 'attendance/dashboard.html', context)
+
+    
+@login_required
+@user_passes_test(is_lecturer)
+def edit_course(request, course_id):
+    """
+    Handles editing an existing course.
+    """
+    course = get_object_or_404(Course, id=course_id, lecturer=request.user)
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"'{course.course_name}' has been updated successfully.")
+            return redirect('lecturer_dashboard')
+    else:
+        form = CourseForm(instance=course)
+    
+    return render(request, 'attendance/edit_course.html', {'form': form, 'course': course})
 
 
 @login_required
-@user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
-def attendance_terminal(request, course_id):
+@user_passes_test(is_lecturer)
+def delete_course(request, course_id):
+    """
+    Handles deleting a course after confirmation.
+    This view should only accept POST requests for safety.
+    """
+    course = get_object_or_404(Course, id=course_id, lecturer=request.user)
+    if request.method == 'POST':
+        course_name = course.course_name
+        course.delete()
+        messages.success(request, f"The course '{course_name}' has been deleted.")
+        return redirect('lecturer_dashboard')
+    
+    return redirect('lecturer_dashboard')
+    
+@login_required
+@user_passes_test(is_lecturer)
+def create_session(request, course_id):
 
-    course = get_object_or_404(Course, id=course_id)
-    session = AttendanceSession.objects.create(course=course)
-    return render(request, 'attendance/terminal.html', {'course': course, 'session_id': session.id})
+    course = get_object_or_404(Course, id=course_id, lecturer=request.user)
+    
+    if request.method == 'POST':
+        
+        form = SessionCreationForm(request.POST)
+        if form.is_valid():
+            
+            session = AttendanceSession(
+                course=course,
+                start_time=form.cleaned_data['start_time'],
+                end_time=form.cleaned_data['end_time']
+            )
+            session.save()
+            
+            return redirect('attendance_terminal', session_id=session.id)
+    else:
+        initial_data = {
+            'start_time': timezone.now(),
+            'end_time': timezone.now() + timedelta(hours=1)
+        }
+      
+        form = SessionCreationForm(initial=initial_data)
+        
+    context = {
+        'form': form,
+        'course': course
+    }
+    return render(request, 'attendance/create_session.html', context)
+
+
+@login_required
+@user_passes_test(is_lecturer)
+def attendance_terminal(request, session_id):
+    session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
+    return render(request, 'attendance/attendance_terminal.html', {'course': session.course, 'session_id': session.id})
 
 
 @login_required
 @user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
 def session_list(request):
-
-    sessions = AttendanceSession.objects.select_related('course').annotate(
-        attendee_count=Count('attendancerecord')
+    sessions = AttendanceSession.objects.filter(
+        course__lecturer=request.user
+    ).select_related('course').annotate(
+        attendee_count=Count('records')
     ).order_by('-created_at')
-    
+
     return render(request, 'attendance/session_list.html', {'sessions': sessions})
 
 
 @login_required
 @user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
 def session_detail(request, session_id):
-
-    session = get_object_or_404(AttendanceSession, id=session_id)
+    session = get_object_or_404(
+        AttendanceSession, 
+        id=session_id, 
+        course__lecturer=request.user
+    )
     records = AttendanceRecord.objects.filter(session=session).select_related('student__user').order_by('student__user__last_name')
     return render(request, 'attendance/session_detail.html', {'session': session, 'records': records})
 
 
 @login_required
-@user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
+@user_passes_test(is_lecturer)
 def export_session_pdf(request, session_id):
-
-    session = get_object_or_404(AttendanceSession, id=session_id)
-    records = AttendanceRecord.objects.filter(session=session).select_related('student__user').order_by('student__user__last_name')
+    session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
+    records = AttendanceRecord.objects.filter(session=session).select_related('student__user').order_by('status', 'student__user__last_name')
 
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=60, bottomMargin=60)
-    
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
     styles = getSampleStyleSheet()
-    elements.append(Paragraph(f"Attendance Report: {session.course.course_name}", styles['h1']))
-    elements.append(Paragraph(f"Date: {session.created_at.strftime('%A, %B %d, %Y')}", styles['h3']))
-    elements.append(Paragraph(f"Course Code: {session.course.course_code}", styles['Normal']))
-    elements.append(Paragraph(f"Total Attendees: {records.count()}", styles['Normal']))
 
-    table_data = [['S/N', 'Full Name', 'Matriculation Number', 'Time Marked']]
-    for i, record in enumerate(records, 1):
-        table_data.append([
-            i, record.student.user.get_full_name(),
-            record.student.matric_number, record.timestamp.strftime('%I:%M:%S %p')
+    elements.append(Paragraph(f"Attendance Report: {session.course.course_name}", styles['h1']))
+    elements.append(Paragraph(f"Course Code: {session.course.course_code}", styles['h2']))
+    elements.append(Paragraph(f"Date: {session.created_at.strftime('%A, %B %d, %Y')}", styles['h3']))
+    elements.append(Paragraph(f"Class Time Window: {session.start_time.strftime('%I:%M %p')} - {session.end_time.strftime('%I:%M %p')}", styles['h3']))
+
+    data = [["S/N", "Full Name", "Matric Number", "Time Marked", "Status"]]
+    for i, record in enumerate(records):
+        data.append([
+            str(i + 1),
+            record.student.user.get_full_name(),
+            record.student.matric_number,
+            record.timestamp.strftime('%I:%M:%S %p'),
+            record.get_status_display() # e.g., "On Time" or "Late"
         ])
     
-    table = Table(table_data, colWidths=[40, 200, 150, 100])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#002366')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke), 
+    table = Table(data, colWidths=[40, 180, 120, 100, 60])
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0056b3')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E6F7FF')),
-    ]))
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ])
+    table.setStyle(style)
     elements.append(table)
-    doc.build(elements)
     
+    doc.build(elements)
     buffer.seek(0)
-    filename = f"Attendance_{session.course.course_code}_{session.created_at.strftime('%Y-%m-%d')}.pdf"
-    return FileResponse(buffer, as_attachment=True, filename=filename)
-
+    return FileResponse(buffer, as_attachment=True, filename=f'attendance_{session.course.course_code}_{session.id}.pdf')
 
 
 @csrf_exempt
-@user_passes_test(is_lecturer, login_url='login', redirect_field_name=None)
 @login_required
+@user_passes_test(is_lecturer)
 def process_frame(request):
-    """
-    Processes an image frame from the attendance terminal to recognize a student's face,
-    and marks them as present for the current session.
-    """
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
     try:
-      
         data = json.loads(request.body)
-        session_id = data.get('session_id')
         image_data_url = data.get('image')
+        session_id = data.get('session_id')
 
-        if not session_id or not image_data_url:
-            return JsonResponse({'status': 'error', 'message': 'Missing session_id or image data.'}, status=400)
+        if not image_data_url or not session_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing image or session ID.'}, status=400)
 
         session = get_object_or_404(AttendanceSession, id=session_id)
 
-        _format, imgstr = image_data_url.split(';base64,')
-        image_data = base64.b64decode(imgstr)
+        # Decode the image and prepare it for processing
+        _format, img_str = image_data_url.split(';base64,')
+        image_data = base64.b64decode(img_str)
         nparr = np.frombuffer(image_data, np.uint8)
-        # Using IMREAD_GRAYSCALE is more direct and efficient
         gray = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
 
+        # Detect faces in the image
         face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
@@ -386,48 +473,71 @@ def process_frame(request):
         x, y, w, h = faces[0]
         face_roi = gray[y:y+h, x:x+w]
 
-
-        students = Student.objects.all()
+        students = Student.objects.select_related('user').all()
         
+        recognized_student = None
+        recognition_confidence = 100 
+
         for student in students:
-            model_b64 = student.lbph_model_data
-            if not model_b64:
+            if not student.lbph_model_data:
                 continue
 
             with tempfile.NamedTemporaryFile(delete=True, suffix='.yml') as temp_f:
-                temp_f.write(base64.b64decode(model_b64))
+                temp_f.write(base64.b64decode(student.lbph_model_data))
                 temp_f.flush()
                 
                 recognizer = cv2.face.LBPHFaceRecognizer_create()
                 recognizer.read(temp_f.name)
-            
+
                 label, confidence = recognizer.predict(face_roi)
 
+                if label == student.user.id and confidence < 65:
+                    recognized_student = student
+                    recognition_confidence = confidence
+                    break
 
-                if confidence < 65:
-                    
-                    record, created = AttendanceRecord.objects.get_or_create(student=student, session=session)
+        if recognized_student:
+            current_status = 'on_time' if timezone.now() <= session.end_time else 'late'
+            
+            record, created = AttendanceRecord.objects.get_or_create(
+                student=recognized_student,
+                session=session,
+                defaults={'status': current_status}
+            )
 
-                    if created:
-                        return JsonResponse({
-                            'status': 'success',
-                            'student_name': student.user.get_full_name(),
-                            'matric_number': student.matric_number,
-                            'timestamp': timezone.now().strftime('%I:%M:%S %p')
-                        })
-                    else:
-                        return JsonResponse({
-                            'status': 'already_marked',
-                            'student_name': student.user.get_full_name()
-                        })
-        
+            if created:
+                return JsonResponse({
+                    'status': 'success',
+                    'student_name': recognized_student.user.get_full_name(),
+                    'matric_number': recognized_student.matric_number,
+                    'timestamp': record.timestamp.strftime('%I:%M:%S %p'),
+                    'attendance_status': record.get_status_display()
+                })
+            else:
+                return JsonResponse({
+                    'status': 'already_marked',
+                    'student_name': recognized_student.user.get_full_name()
+                })
         
         return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
 
     except Exception as e:
-        
         logger.error(f"An error occurred in process_frame: {e}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
+        
+@login_required
+@user_passes_test(is_lecturer)
+def update_record_status(request, record_id):
+    if request.method == 'POST':
+        record = get_object_or_404(AttendanceRecord, id=record_id, session__course__lecturer=request.user)
+        # Toggle status between 'late' and 'on_time'
+        if record.status == 'late':
+            record.status = 'on_time'
+        else:
+            record.status = 'late'
+        record.save()
+        return redirect('session_detail', session_id=record.session.id)
+    return redirect('lecturer_dashboard')
         
         
 def custom_404_view(request, exception):

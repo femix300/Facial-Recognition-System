@@ -8,134 +8,267 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-
     :root {
-        --primary-color: #0056b3;
-        --success-color: #198754;
-        --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
-        --card-hover-shadow: 0 0.8rem 1.5rem rgba(0, 0, 0, 0.12);
+        --primary-color: #0d6efd;
+        --primary-dark: #0a58ca;
+        --primary-light: #cfe2ff;
+        --secondary-color: #6c757d;
+        --danger-color: #dc3545;
+        --text-dark: #212529;
+        --text-light: #6c757d;
+        --body-bg: #f8f9fa;
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+        --card-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        --card-radius: 0.75rem;
     }
-    body, .card, .btn {
+    
+    body {
         font-family: 'Poppins', sans-serif;
+        background-color: var(--body-bg);
     }
+
+    /* --- Universal Fade-In Animation --- */
+    .dashboard-content {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Header Section --- */
     .dashboard-header {
-        border-bottom: 3px solid var(--primary-color);
-        padding-bottom: 1rem;
+        text-align: center;
+        padding-bottom: 1.5rem;
         margin-bottom: 2rem;
     }
+
+    /* --- Stat Cards --- */
     .stat-card {
-        background: #ffffff;
-        border: 1px solid #e9ecef;
-        border-radius: 0.75rem;
+        background: var(--card-bg);
+        border: none;
+        border-radius: var(--card-radius);
         box-shadow: var(--card-shadow);
-        color: var(--primary-color);
+        padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-hover-shadow);
     }
     .stat-card .stat-icon {
-        font-size: 3rem;
-        opacity: 0.5;
+        font-size: 4rem;
+        color: var(--primary-color);
+        opacity: 0.1;
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        transition: transform 0.3s ease, color 0.3s ease;
     }
-    .course-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(-5deg);
+        color: var(--primary-dark);
     }
+    .stat-card h6 {
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    .stat-card .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    /* --- Course Cards --- */
     .course-card {
+        background: var(--card-bg);
         border: none;
-        border-radius: 0.75rem;
+        border-radius: var(--card-radius);
         box-shadow: var(--card-shadow);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-left: 5px solid var(--primary-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
     }
     .course-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--card-hover-shadow);
     }
+    .course-card .card-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
     .course-card .card-title {
         font-weight: 600;
-        color: var(--primary-color);
+        color: var(--text-dark);
     }
-    .course-card .card-icon {
-        font-size: 3rem;
+    .course-card .card-text {
+        color: var(--text-light);
+        flex-grow: 1; /* Pushes the button group to the bottom */
+        margin-top: 1rem;
+    }
+    .course-meta {
+        font-size: 0.85rem;
+        background-color: var(--body-bg);
+        border-top: 1px solid #dee2e6;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    /* --- Dropdown Menu Styling --- */
+    .dropdown-item i {
+        width: 20px; /* Aligns text for icons */
+    }
+    .dropdown-item.text-danger:hover {
+        background-color: var(--danger-color);
+        color: white !important;
+    }
+    .dropdown-item.text-danger:focus {
+        background-color: var(--danger-color);
+        color: white !important;
+    }
+
+    /* --- Empty State --- */
+    .empty-state {
+        background-color: var(--card-bg);
+        padding: 2rem;
+        text-align: center;
+        border-radius: var(--card-radius);
+        border: 2px dashed #e9ecef;
+    }
+    .empty-state .icon {
+        font-size: 3.5rem;
         color: var(--primary-color);
-        opacity: 0.08;
-        position: absolute;
-        right: 1.5rem;
-        top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* --- Responsive Design --- */
+    @media (min-width: 768px) {
+        .dashboard-header {
+            text-align: left;
+        }
+        .empty-state {
+            padding: 4rem;
+        }
     }
 </style>
 
-<div class="container mt-4">
-    <div class="dashboard-header d-flex flex-wrap justify-content-between align-items-center">
-        <div>
-            <h1 class="display-5 fw-bold">Lecturer Dashboard</h1>
-            <p class="text-muted fs-5">Welcome back, {{ user.first_name|default:user.username }}!</p>
+<div class="container py-4 py-md-5 dashboard-content">
+    <div class="row align-items-center dashboard-header">
+        <div class="col-md-6">
+            <h1 class="fw-bold display-5">Lecturer Dashboard</h1>
+            <p class="text-muted fs-5 mb-3 mb-md-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
         </div>
-        <a href="{% url 'add_course' %}" class="btn btn-primary btn-lg shadow-sm">
-            <i class="bi bi-plus-circle-fill me-2"></i>Add New Course
-        </a>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Total Courses</h6>
-                        <h2 class="display-4 fw-bold">{{ courses.count }}</h2>
-                    </div>
-                    <i class="bi bi-journal-bookmark-fill stat-icon"></i>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Total Students</h6>
-                        <h2 class="display-4 fw-bold">{{ student_count }}</h2>
-                    </div>
-                    <i class="bi bi-people-fill stat-icon"></i>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card bg-light">
-                <div class="card-body text-center">
-                    <h6 class="text-muted">Need to see past records?</h6>
-                    <a href="{% url 'session_list' %}" class="btn btn-outline-primary mt-2">
-                        <i class="bi bi-card-checklist me-2"></i>View All Reports
-                    </a>
-                </div>
+        <div class="col-md-6 text-md-end">
+            <div class="d-grid d-md-inline-flex gap-2">
+                <a href="{% url 'session_list' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-card-checklist me-2"></i> View All Reports
+                </a>
+                <a href="{% url 'add_course' %}" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Add New Course
+                </a>
             </div>
         </div>
     </div>
 
-    <hr class="my-4">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card">
+                <div>
+                    <h6>My Courses</h6>
+                    <span class="stat-number">{{ total_courses }}</span>
+                </div>
+                <i class="bi bi-journal-bookmark-fill stat-icon"></i>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card">
+                <div>
+                    <h6>Total Students</h6>
+                    <span class="stat-number">{{ total_students }}</span>
+                </div>
+                <i class="bi bi-people-fill stat-icon"></i>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="stat-card">
+                <div>
+                    <h6>Sessions Held</h6>
+                    <span class="stat-number">{{ total_sessions }}</span>
+                </div>
+                <i class="bi bi-camera-reels-fill stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="fw-bold h3 mb-0">My Courses</h2>
+    </div>
 
     {% if courses %}
-        <h2 class="mb-4">Select a Course to Begin Attendance</h2>
-        <div class="course-grid">
+        <div class="row">
             {% for course in courses %}
-                <div class="card course-card">
-                    <div class="card-body position-relative">
-                        <i class="bi bi-book-half card-icon"></i>
-                        <h5 class="card-title">{{ course.course_name }}</h5>
-                        <p class="card-subtitle mb-2 text-muted">{{ course.course_code }}</p>
-                        <p class="card-text small">Launch the real-time terminal to begin marking attendance for this course.</p>
-                        <a href="{% url 'attendance_terminal' course.id %}" class="btn btn-primary mt-3 w-100 stretched-link">
-                            <i class="bi bi-camera-video-fill me-2"></i>Start Attendance
-                        </a>
+                <div class="col-lg-4 col-md-6 mb-4 d-flex">
+                    <div class="card course-card w-100">
+                        <div class="card-body">
+                            <div>
+                                <h5 class="card-title">{{ course.course_name }}</h5>
+                                <p class="card-subtitle mb-2 text-muted">{{ course.course_code }}</p>
+                            </div>
+                            <p class="card-text small">Launch the terminal to begin an attendance session for this course.</p>
+                            
+                            <div class="btn-group mt-auto">
+                                <a href="{% url 'create_session' course.id %}" class="btn btn-primary">
+                                    <i class="bi bi-camera-video-fill me-2"></i>Start Attendance
+                                </a>
+                                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'session_list' %}?course={{ course.id }}">
+                                            <i class="bi bi-bar-chart-line-fill me-2"></i>View Reports
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'edit_course' course.id %}">
+                                            <i class="bi bi-pencil-square me-2"></i>Edit Course
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form action="{% url 'delete_course' course.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete \'{{ course.course_name|escapejs }}\'? This action cannot be undone.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-trash3-fill me-2"></i>Delete Course
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="course-meta d-flex justify-content-between">
+                            <span class="text-muted"><i class="bi bi-people-fill me-1"></i> {{ course.student_count }} Student{{ course.student_count|pluralize }}</span>
+                            <span class="text-muted"><i class="bi bi-camera-reels me-1"></i> {{ course.session_count }} Session{{ course.session_count|pluralize }}</span>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center p-5 bg-light rounded-3">
-            <i class="bi bi-journal-x" style="font-size: 4rem; color: var(--primary-color);"></i>
-            <h2 class="mt-3 fw-bold">No Courses Found!</h2>
-            <p class="lead text-muted">There are no courses in the system yet. Click the button below to add your first course.</p>
+        <div class="empty-state">
+            <div class="icon"><i class="bi bi-journal-x"></i></div>
+            <h2 class="mt-3 fw-bold">You haven't added any courses yet.</h2>
+            <p class="lead text-muted mx-auto" style="max-width: 600px;">
+                Get started by adding your first course. It will appear here, ready for you to start taking attendance.
+            </p>
             <a href="{% url 'add_course' %}" class="btn btn-primary btn-lg mt-3">
-                <i class="bi bi-plus-circle-fill me-2"></i>Add a New Course
+                <i class="bi bi-plus-circle-fill me-2"></i>Add Your First Course
             </a>
         </div>
     {% endif %}

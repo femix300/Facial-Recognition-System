@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -21,15 +22,25 @@ class Course(models.Model):
 class AttendanceSession(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Session for {self.course.course_code} on {self.created_at.strftime('%Y-%m-%d')}"
 
 class AttendanceRecord(models.Model):
-    session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    STATUS_CHOICES = (
+        ('on_time', 'On Time'),
+        ('late', 'Late'),
+    )
+    session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE, related_name='records')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='records')
     timestamp = models.DateTimeField(auto_now_add=True)
-    is_present = models.BooleanField(default=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='on_time')
+
+    class Meta:
+        unique_together = ('session', 'student')
 
     def __str__(self):
-        return f"{self.student} marked in {self.session}"
+        return f"{self.student} marked for {self.session.course.course_code} - {self.status}"
