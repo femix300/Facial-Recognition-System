@@ -488,11 +488,14 @@ def process_frame(request):
 
         x, y, w, h = faces[0]
         face_roi = gray[y:y+h, x:x+w]
-
+        
+        students = Student.objects.select_related('user').all()
+        """
         students = session.course.enrolled_students.select_related('user').all()
         
         if not students:
             return JsonResponse({'status': 'error', 'message': 'No students are enrolled in this course.'})
+        """
         
         recognized_student = None
         recognition_confidence = 100 
@@ -541,6 +544,11 @@ def process_frame(request):
         return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
 
     except Exception as e:
+        print("="*60)
+        print(f"CRITICAL ERROR IN process_frame: The error is '{e}'")
+        import traceback
+        traceback.print_exc()
+        print("="*60)
         logger.error(f"An error occurred in process_frame: {e}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
         
