@@ -48,8 +48,6 @@
     
     .challenge-icon { display: none; margin-bottom: 1.5rem; height: 60px; }
     .challenge-icon.active { display: block; }
-    @keyframes blink-animation { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
-    #blink-icon { animation: blink-animation 1.5s infinite; font-size: 4rem; }
     @keyframes mouth-animation { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
     #mouth-icon-shape { width: 60px; height: 30px; border: 4px solid white; border-top: none; border-radius: 0 0 60px 60px; transform-origin: top center; }
     #mouth-icon.active #mouth-icon-shape { animation: mouth-animation 1.5s infinite; }
@@ -117,7 +115,6 @@
             <div class="col-lg-7 d-flex flex-column align-items-center justify-content-center">
                 <h2 class="text-center mb-3">Attendance for <strong>{{ course.course_name }}</strong></h2>
                 
-                <div class="challenge-icon" id="blink-icon"><i class="bi bi-eye-fill"></i></div>
                 <div class="challenge-icon" id="mouth-icon"><div id="mouth-icon-shape"></div></div>
                 <div class="challenge-icon" id="head-turn-icon"><i class="bi bi-person-badge"></i></div>
 
@@ -182,42 +179,14 @@
     const resultName = document.getElementById('result-name');
     const sessionId = "{{ session_id }}";
     
-    let blinkState = {
-        wasOpen: true 
-    };
+    // The blinkState variable has been removed
     
     let isProcessing = false;
     let isTransitioning = false;
 
   
     const challenges = {
-        BLINK: {
-            instruction: "Please Blink Your Eyes",
-            iconId: "blink-icon",
-            detectionFunction: (landmarks) => {
-                const leftEyeIndices = [33, 160, 158, 133, 153, 144];
-                const rightEyeIndices = [362, 385, 387, 263, 373, 380];
-                const getEAR = (eyeIndices) => {
-                    const p1 = landmarks[eyeIndices[3]], p2 = landmarks[eyeIndices[1]], p3 = landmarks[eyeIndices[2]], p4 = landmarks[eyeIndices[0]], p5 = landmarks[eyeIndices[5]], p6 = landmarks[eyeIndices[4]];
-                    const verDist = Math.hypot(p2.y - p6.y, p2.x - p6.x) + Math.hypot(p3.y - p5.y, p3.x - p5.x);
-                    const horDist = Math.hypot(p1.y - p4.y, p1.x - p4.x);
-                    return (horDist === 0) ? 0 : verDist / (2.0 * horDist);
-                };
-                
-                const avgEAR = (getEAR(leftEyeIndices) + getEAR(rightEyeIndices)) / 2.0;
-                const isClosed = avgEAR < 0.23; 
-    
-                let blinked = false;
-                if (blinkState.wasOpen && isClosed) {
-                    blinked = true;
-                }
-
-                // Update the state for the next frame.
-                blinkState.wasOpen = !isClosed;
-
-                return blinked;
-            }
-        },
+        // The BLINK challenge object has been removed
         MOUTH_OPEN: {
             instruction: "Please Open Your Mouth",
             iconId: "mouth-icon",
@@ -265,7 +234,7 @@
     function startLivenessCheck() {
         isProcessing = false;
         resultOverlay.classList.remove('show');
-        blinkState = { wasOpen: true, detected: false };
+        // The blinkState reset line has been removed
         generateChallengeSequence();
         updateInstruction();
     }

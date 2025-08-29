@@ -10,7 +10,7 @@ from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout
 from .models import PasswordReset 
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.conf import settings
