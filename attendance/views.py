@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse, FileResponse
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.utils import timezone
@@ -23,11 +23,12 @@ import cv2
 import logging
 import numpy as np
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from .models import Student, Course, AttendanceSession, AttendanceRecord, PasswordReset
-from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm, SessionCreationForm
+from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm, SessionCreationForm, LecturerProfileUpdateForm, StudentProfileUpdateForm
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,9 @@ HAAR_CASCADE_PATH = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml
 
 def is_lecturer(user):
     return user.is_staff
+    
+def is_student(user):
+    return not user.is_staff and hasattr(user, 'student')
 
 
 def train_lbph_model_from_samples(face_samples_b64: list, user_id: int) -> str:
@@ -386,8 +390,16 @@ def session_detail(request, session_id):
         id=session_id, 
         course__lecturer=request.user
     )
-    records = AttendanceRecord.objects.filter(session=session).select_related('student__user').order_by('student__user__last_name')
-    return render(request, 'attendance/session_detail.html', {'session': session, 'records': records})
+    on_time_records = session.records.filter(status='on_time').select_related('student__user')
+    late_records = session.records.filter(status='late').select_related('student__user')
+    
+    context = {
+        'session': session,
+        'on_time_records': on_time_records,
+        'late_records': late_records,
+    }
+    
+    return render(request, 'attendance/session_detail.html', context)
 
 
 @login_required
@@ -467,6 +479,9 @@ def process_frame(request):
 
         x, y, w, h = faces[0]
         face_roi = gray[y:y+h, x:x+w]
+        
+        best_match_student = None
+        min_confidence = float('inf')  # Start with an infinitely high 'difference' score
 
         students = Student.objects.select_related('user').all()
         
@@ -485,17 +500,19 @@ def process_frame(request):
                 recognizer.read(temp_f.name)
 
                 label, confidence = recognizer.predict(face_roi)
+                
+                if confidence < min_confidence:
+                    min_confidence = confidence
+                    best_match_student = student
+        
+        # Now, after checking all students, decide if the best match is good enough.
+        CONFIDENCE_THRESHOLD = 60
 
-                if label == student.user.id and confidence < 65:
-                    recognized_student = student
-                    recognition_confidence = confidence
-                    break
-
-        if recognized_student:
+        if best_match_student and min_confidence < CONFIDENCE_THRESHOLD:
             current_status = 'on_time' if timezone.now() <= session.end_time else 'late'
             
             record, created = AttendanceRecord.objects.get_or_create(
-                student=recognized_student,
+                student=best_match_student,
                 session=session,
                 defaults={'status': current_status}
             )
@@ -503,17 +520,16 @@ def process_frame(request):
             if created:
                 return JsonResponse({
                     'status': 'success',
-                    'student_name': recognized_student.user.get_full_name(),
-                    'matric_number': recognized_student.matric_number,
+                    'student_name': best_match_student.user.get_full_name(),
+                    'matric_number': best_match_student.matric_number,
                     'timestamp': record.timestamp.strftime('%I:%M:%S %p'),
                     'attendance_status': record.get_status_display()
                 })
             else:
                 return JsonResponse({
                     'status': 'already_marked',
-                    'student_name': recognized_student.user.get_full_name()
+                    'student_name': best_match_student.user.get_full_name()
                 })
-        
         return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
 
     except Exception as e:
@@ -616,3 +632,108 @@ def reset_password(request, reset_id):
 def password_reset_complete(request):
     """Displays a success message after the password has been reset."""
     return render(request, 'attendance/password_reset_complete.html')
+    
+@login_required
+def student_list(request):
+    student_list = Student.objects.select_related('user').order_by('user__last_name', 'user__first_name')
+    
+    query = request.GET.get('q')
+    if query:
+        student_list = student_list.filter(
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(matric_number__icontains=query)
+        )
+    paginator = Paginator(student_list, 10)
+    page_number = request.GET.get('page')
+    try:
+        students = paginator.page(page_number)
+    except PageNotAnInteger:
+        students = paginator.page(1)
+    except EmptyPage:
+        students = paginator.page(paginator.num_pages)
+
+    context = {
+        'students': students,
+        'total_students': paginator.count,
+        'search_query': query or ''
+    }
+    return render(request, 'attendance/student_list.html', context)
+    
+@login_required
+@user_passes_test(is_lecturer)
+def lecturer_update_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = LecturerProfileUpdateForm(request.POST, instance=user, user=user)
+        if form.is_valid():
+            with transaction.atomic():
+                user = form.save(commit=False)
+                user.username = form.cleaned_data['email']
+                user.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('lecturer_dashboard')
+    else:
+        form = LecturerProfileUpdateForm(instance=user, user=user)
+
+    return render(request, 'attendance/lecturer_update_profile.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_student)
+def student_update_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = StudentProfileUpdateForm(request.POST, instance=user, user=user)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user_instance = form.save(commit=False)
+                    user_instance.username = form.cleaned_data['email']
+                    user_instance.save()
+                    student_instance = user.student
+                    student_instance.matric_number = form.cleaned_data['matric_number']
+                    student_instance.save()
+                    
+                messages.success(request, 'Your profile has been updated successfully!')
+                return redirect('student_dashboard')
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+    else:
+        form = StudentProfileUpdateForm(instance=user, user=user)
+
+    return render(request, 'attendance/student_update_profile.html', {'form': form})
+    
+@login_required
+def delete_account(request):
+    user_to_delete = request.user
+
+    if request.method == 'POST':
+        try:
+            logout(request)
+            user_to_delete.delete()
+            
+            messages.success(request, 'Your account has been successfully deleted.')
+            return redirect('home')
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred while deleting your account: {e}')
+            return redirect('home')
+
+    return render(request, 'attendance/delete_account_confirm.html')
+    
+@login_required
+@user_passes_test(is_lecturer)
+def close_session(request, session_id):
+    session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
+    session.is_active = False
+    session.save()
+
+    if not session.records.exists():
+        session.delete()
+        messages.warning(request, f"Session for {session.course.course_name} was closed and deleted because no students attended.")
+    else:
+        messages.success(request, f"Session for {session.course.course_name} has been successfully closed.")
+        
+    return redirect('lecturer_dashboard')

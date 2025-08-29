@@ -1,0 +1,54 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Confirm Account Deletion{% endblock %}
+
+{% block content %}
+<style>
+    .delete-card {
+        border-left: 5px solid #dc3545; /* Red accent for warning */
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-lg delete-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4rem;"></i>
+                        <h1 class="fw-bold mt-3">Are you sure?</h1>
+                    </div>
+                    
+                    <p class="lead text-center text-muted mt-3">
+                        You are about to permanently delete your account. This action cannot be undone.
+                    </p>
+                    
+                    <div class="alert alert-danger mt-4">
+                        <h5 class="alert-heading fw-bold">Warning!</h5>
+                        <p class="mb-0">
+                            All of your data, including your profile information, course details, and attendance records, will be permanently erased.
+                        </p>
+                    </div>
+
+                    <form method="post" action="{% url 'delete_account' %}">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold">
+                                Yes, Delete My Account
+                            </button>
+                            {% if user.is_staff %}
+                                <a href="{% url 'lecturer_update_profile' %}" class="btn btn-secondary">
+                                    No, Take Me Back
+                                </a>
+                            {% else %}
+                                <a href="{% url 'student_update_profile' %}" class="btn btn-secondary">
+                                    No, Take Me Back
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

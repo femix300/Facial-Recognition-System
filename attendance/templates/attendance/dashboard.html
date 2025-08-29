@@ -39,7 +39,7 @@
 
     /* --- Header Section --- */
     .dashboard-header {
-        text-align: center;
+        border-bottom: 1px solid #dee2e6;
         padding-bottom: 1.5rem;
         margin-bottom: 2rem;
     }
@@ -124,10 +124,7 @@
     .dropdown-item i {
         width: 20px; /* Aligns text for icons */
     }
-    .dropdown-item.text-danger:hover {
-        background-color: var(--danger-color);
-        color: white !important;
-    }
+    .dropdown-item.text-danger:hover,
     .dropdown-item.text-danger:focus {
         background-color: var(--danger-color);
         color: white !important;
@@ -160,17 +157,17 @@
 
 <div class="container py-4 py-md-5 dashboard-content">
     <div class="row align-items-center dashboard-header">
-        <div class="col-md-6">
+        <div class="col-lg-6">
             <h1 class="fw-bold display-5">Lecturer Dashboard</h1>
-            <p class="text-muted fs-5 mb-3 mb-md-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+            <p class="text-muted fs-5 mb-3 mb-lg-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <div class="d-grid d-md-inline-flex gap-2">
-                <a href="{% url 'session_list' %}" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-card-checklist me-2"></i> View All Reports
+        <div class="col-lg-6 text-lg-end">
+            <div class="d-grid d-lg-inline-flex gap-2">
+                <a href="{% url 'lecturer_update_profile' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
                 </a>
                 <a href="{% url 'add_course' %}" class="btn btn-primary btn-lg shadow-sm">
-                    <i class="bi bi-plus-circle-fill me-2"></i> Add New Course
+                    <i class="bi bi-plus-circle-fill me-2"></i>Add New Course
                 </a>
             </div>
         </div>
@@ -208,6 +205,9 @@
 
     <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
         <h2 class="fw-bold h3 mb-0">My Courses</h2>
+        <a href="{% url 'session_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-card-checklist me-2"></i> View All Reports
+        </a>
     </div>
 
     {% if courses %}

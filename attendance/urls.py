@@ -19,9 +19,12 @@ urlpatterns = [
 
     # Student Dashboard
     path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('student/dashboard/profile/', views.student_update_profile, name='student_update_profile'),
     
     # Lecturer Dashboard and Course Management
     path('dashboard/', views.lecturer_dashboard, name='lecturer_dashboard'),
+    path('dashboard/profile/', views.lecturer_update_profile, name='lecturer_update_profile'),
+    path('dashboard/students/', views.student_list, name='student_list'),
     path('dashboard/add-course/', views.add_course, name='add_course'),
     path('dashboard/course/edit/<int:course_id>/', views.edit_course, name='edit_course'),
     path('dashboard/course/delete/<int:course_id>/', views.delete_course, name='delete_course'),
@@ -29,6 +32,7 @@ urlpatterns = [
     # Session and Attendance Management
     path('session/create/<int:course_id>/', views.create_session, name='create_session'),
     path('terminal/<int:session_id>/', views.attendance_terminal, name='attendance_terminal'),
+    path('session/close/<int:session_id>/', views.close_session, name='close_session'),
     path('record/update_status/<int:record_id>/', views.update_record_status, name='update_record_status'),
     path('dashboard/sessions/', views.session_list, name='session_list'),
     path('dashboard/session/<int:session_id>/', views.session_detail, name='session_detail'),
@@ -36,4 +40,5 @@ urlpatterns = [
     
     # API Endpoint for Face Recognition
     path('api/process-frame/', views.process_frame, name='process_frame_api'),
+    path('profile/delete/', views.delete_account, name='delete_account'),
 ]

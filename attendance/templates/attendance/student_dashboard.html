@@ -34,6 +34,7 @@
     .profile-card {
         background: linear-gradient(135deg, var(--primary-color), #007bff);
         color: white;
+        position: relative; /* Needed for positioning the edit button */
     }
     .profile-card .icon {
         background: rgba(255, 255, 255, 0.2);
@@ -48,6 +49,19 @@
         font-size: 3rem;
         color: #fff;
     }
+    .profile-card .btn-edit-profile {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+    .profile-card .btn-edit-profile:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
 
     /* Stat Card Styling */
     .stat-card {
@@ -66,13 +80,11 @@
         color: var(--primary-color);
     }
 
-    /* --- FIX FOR CALENDAR OVERFLOW --- */
+    /* Calendar Styling */
     .calendar-wrapper {
         overflow-x: auto; /* Allows horizontal scrolling only if content overflows */
         padding-bottom: 10px; /* Adds some space for the scrollbar */
     }
-    /* --- END FIX --- */
-
     .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -145,6 +157,9 @@
                         <p class="mb-1 opacity-75"><i class="bi bi-card-text me-2"></i><strong>Matric No:</strong> {{ student.matric_number }}</p>
                         <p class="mb-0 opacity-75"><i class="bi bi-envelope-fill me-2"></i><strong>Email:</strong> {{ student.user.email }}</p>
                     </div>
+                    <a href="{% url 'student_update_profile' %}" class="btn btn-sm btn-edit-profile ms-auto">
+                        <i class="bi bi-pencil-square me-1"></i> Edit
+                    </a>
                 </div>
             </div>
 
@@ -168,7 +183,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    </div>
+                </div>
             </div>
         </div>
 

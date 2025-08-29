@@ -119,8 +119,65 @@ class SessionCreationForm(forms.Form):
         end = cleaned_data.get("end_time")
 
         if start and end:
+            start = start.replace(second=0, microsecond=0)
+            end = end.replace(second=0, microsecond=0)
+            
             if end <= start:
                 raise forms.ValidationError("The session end time must be after the start time.")
             if start < timezone.now() - datetime.timedelta(minutes=1):
                 raise forms.ValidationError("The session start time cannot be in the past.")
+                
+            cleaned_data['start_time'] = start
+            cleaned_data['end_time'] = end
         return cleaned_data
+        
+class LecturerProfileUpdateForm(forms.ModelForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'})
+    )
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+            raise forms.ValidationError("This email is already in use by another account.")
+        return email
+
+
+class StudentProfileUpdateForm(forms.ModelForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'})
+    )
+    matric_number = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Matriculation Number'})
+    )
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user and hasattr(self.user, 'student'):
+            self.fields['matric_number'].initial = self.user.student.matric_number
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+            raise forms.ValidationError("This email is already in use by another account.")
+        return email

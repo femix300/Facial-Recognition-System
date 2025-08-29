@@ -153,6 +153,11 @@
 </div>
 
 <canvas id="capture_canvas" style="display:none;"></canvas>
+<div class="mt-4">
+    <a href="{% url 'close_session' session.id %}" class="btn btn-danger btn-lg">
+        <i class="bi bi-stop-circle-fill me-2"></i> End Session
+    </a>
+</div>
 {% endblock %}
 
 {% block scripts %}

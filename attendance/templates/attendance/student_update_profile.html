@@ -1,0 +1,119 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body {
+        background-color: #f0f2f5; /* A softer background */
+        font-family: 'Poppins', sans-serif;
+    }
+    .profile-card {
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        border: none;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        border-color: #86b7fe;
+    }
+    .input-group-text {
+        background-color: #e9ecef;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card profile-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-lines-fill fs-1 text-primary"></i>
+                        <h1 class="fw-bold mt-2">Edit Your Profile</h1>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    {{ form.first_name }}
+                                </div>
+                                {% for error in form.first_name.errors %}
+                                    <small class="text-danger d-block mt-1">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    {{ form.last_name }}
+                                </div>
+                                {% for error in form.last_name.errors %}
+                                    <small class="text-danger d-block mt-1">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">Email Address</label>
+                             <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope-at"></i></span>
+                                {{ form.email }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <small class="text-danger d-block mt-1">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.matric_number.id_for_label }}" class="form-label fw-bold">Matriculation Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                {{ form.matric_number }}
+                            </div>
+                            {% for error in form.matric_number.errors %}
+                                <small class="text-danger d-block mt-1">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                           <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                               <i class="bi bi-check-circle-fill me-2"></i>Save Changes
+                           </button>
+                           <a href="{% url 'student_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                        
+                        <hr class="my-4">
+                        <div class="text-center">
+                            <a href="{% url 'delete_account' %}" class="btn btn-link text-danger">
+                                <i class="bi bi-trash3-fill me-1"></i> Permanently delete my account
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
