@@ -26,7 +26,7 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     .branding-panel {
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
         color: white;
         padding: 2rem;
         display: flex;
@@ -79,7 +79,7 @@
             <div class="col-lg-7">
                 <div class="form-panel">
                     <h1 class="fw-bold mb-4 text-center">Create a Lecturer Account</h1>
-                    
+
                     <form method="post" novalidate>
                         {% csrf_token %}
 
@@ -91,7 +91,11 @@
                             </div>
                         {% endif %}
 
-                        {% if messages %}{% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}{% endif %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -164,17 +168,17 @@
 
         togglePasswordButtons.forEach(button => {
             button.addEventListener('click', function () {
-                // The data-target attribute points to the ID of the password input.
+                // The 'data-target' attribute on the button should point to the ID of the password input.
                 // Django forms automatically generate IDs like 'id_fieldname'.
                 const targetInput = document.querySelector(this.dataset.target);
                 const icon = this.querySelector('i');
 
                 if (targetInput) {
-                    // Switch the input type between 'password' and 'text'
+                    // Switch the input type between 'password' and 'text' to show/hide the password.
                     const newType = targetInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     targetInput.setAttribute('type', newType);
 
-                    // Switch the icon class between 'bi-eye' and 'bi-eye-slash'
+                    // Switch the icon class to provide visual feedback.
                     icon.classList.toggle('bi-eye');
                     icon.classList.toggle('bi-eye-slash');
                 }
@@ -183,3 +187,4 @@
     });
 </script>
 {% endblock %}
+
