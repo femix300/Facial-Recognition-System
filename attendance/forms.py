@@ -93,15 +93,6 @@ class CourseForm(forms.ModelForm):
         }
         
 class SessionCreationForm(forms.Form):
-    start_time = forms.DateTimeField(
-        label="Session Start Time",
-        widget=forms.DateTimeInput(
-            attrs={
-                'type': 'datetime-local',
-                'class': 'form-control form-control-lg'
-            }
-        )
-    )
     end_time = forms.DateTimeField(
         label="Session End Time",
         widget=forms.DateTimeInput(
@@ -112,24 +103,16 @@ class SessionCreationForm(forms.Form):
         )
     )
 
-    def clean(self):
-        
-        cleaned_data = super().clean()
-        start = cleaned_data.get("start_time")
-        end = cleaned_data.get("end_time")
+    def clean_end_time(self):
+        end_time = self.cleaned_data.get("end_time")
 
-        if start and end:
-            start = start.replace(second=0, microsecond=0)
-            end = end.replace(second=0, microsecond=0)
+        if end_time:
+            if end_time <= timezone.now():
+                raise forms.ValidationError("The session end time must be in the future.")
             
-            if end <= start:
-                raise forms.ValidationError("The session end time must be after the start time.")
-            if start < timezone.now() - datetime.timedelta(minutes=1):
-                raise forms.ValidationError("The session start time cannot be in the past.")
-                
-            cleaned_data['start_time'] = start
-            cleaned_data['end_time'] = end
-        return cleaned_data
+            return end_time.replace(second=0, microsecond=0)
+            
+        return end_time
         
 class LecturerProfileUpdateForm(forms.ModelForm):
     email = forms.EmailField(

@@ -133,7 +133,7 @@ DEFAULT_FROM_EMAIL = 'Smart Attendance System <emmanuelobiasogu32@gmail.com>'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Lagos'
 
 USE_I18N = True
 

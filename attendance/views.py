@@ -332,28 +332,30 @@ def delete_course(request, course_id):
 @login_required
 @user_passes_test(is_lecturer)
 def create_session(request, course_id):
-
     course = get_object_or_404(Course, id=course_id, lecturer=request.user)
     
     if request.method == 'POST':
-        
         form = SessionCreationForm(request.POST)
         if form.is_valid():
-            
-            session = AttendanceSession(
+            start_time = timezone.now()
+            end_time = form.cleaned_data['end_time']
+
+            if AttendanceSession.objects.filter(course=course, end_time__gt=start_time, is_active=True).exists():
+                messages.error(request, "An active session for this course is already running.")
+                return redirect('lecturer_dashboard')
+
+            session = AttendanceSession.objects.create(
                 course=course,
-                start_time=form.cleaned_data['start_time'],
-                end_time=form.cleaned_data['end_time']
+                start_time=start_time,
+                end_time=end_time,
+                is_active=True
             )
-            session.save()
-            
+        
             return redirect('attendance_terminal', session_id=session.id)
     else:
         initial_data = {
-            'start_time': timezone.now(),
             'end_time': timezone.now() + timedelta(hours=1)
         }
-      
         form = SessionCreationForm(initial=initial_data)
         
     context = {
@@ -367,7 +369,11 @@ def create_session(request, course_id):
 @user_passes_test(is_lecturer)
 def attendance_terminal(request, session_id):
     session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
-    return render(request, 'attendance/terminal.html', {'course': session.course, 'session_id': session.id})
+    context = {
+        'session': session,
+        'course': session.course 
+    }
+    return render(request, 'attendance/terminal.html', context)
 
 
 @login_required
