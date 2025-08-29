@@ -8,17 +8,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-    
     :root {
         --primary-color: #0056b3;
         --success-color: #28a745;
+        --danger-color: #dc3545;
         --neutral-color: #6c757d;
         --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     }
     body, .btn {
         font-family: 'Poppins', sans-serif;
     }
-    
     .registration-card {
         border-radius: 1rem;
         box-shadow: var(--card-shadow);
@@ -48,6 +47,18 @@
     .form-control { border-left: 0 !important; }
     .form-control:focus { box-shadow: none !important; border-color: #dee2e6 !important; }
     
+    /* Style for invalid fields */
+    .form-control.is-invalid, .input-group.is-invalid .form-control {
+        border-color: var(--danger-color) !important;
+    }
+    .input-group.is-invalid .input-group-text {
+        color: var(--danger-color);
+    }
+    .invalid-feedback {
+        font-size: 0.875em;
+        font-weight: 500;
+    }
+
     #camera-container {
         border-radius: 50% !important;
         overflow: hidden;
@@ -84,18 +95,76 @@
             <div class="col-lg-7">
                 <div class="form-panel">
                     <h1 class="fw-bold mb-4 text-center">Create an Account</h1>
-                    {% if messages %}{% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}{% endif %}
                     
                     <form id="registrationForm" method="post" novalidate>
                         {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if messages %}{% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}{% endif %}
+
                         <h4 class="mb-3">Step 1: Your Details</h4>
                         <div class="row">
-                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.first_name }}</div></div>
-                            <div class="col-md-6 mb-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span>{{ form.last_name }}</div></div>
+                            <div class="col-md-6 mb-3">
+                                <div class="input-group {% if form.first_name.errors %}is-invalid{% endif %}">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    {{ form.first_name }}
+                                </div>
+                                {% for error in form.first_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="input-group {% if form.last_name.errors %}is-invalid{% endif %}">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    {{ form.last_name }}
+                                </div>
+                                {% for error in form.last_name.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                            </div>
                         </div>
-                        <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-envelope"></i></span>{{ form.email }}</div>
-                        <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-card-text"></i></span>{{ form.matric_number }}</div>
-                        <div class="input-group mb-4"><span class="input-group-text"><i class="bi bi-key"></i></span>{{ form.password }}</div>
+
+                        <div class="mb-3">
+                            <div class="input-group {% if form.email.errors %}is-invalid{% endif %}">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                {{ form.email }}
+                            </div>
+                            {% for error in form.email.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="input-group {% if form.matric_number.errors %}is-invalid{% endif %}">
+                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                {{ form.matric_number }}
+                            </div>
+                            {% for error in form.matric_number.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="input-group {% if form.password.errors %}is-invalid{% endif %}">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                {{ form.password }}
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#id_password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% for error in form.password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="input-group {% if form.confirm_password.errors %}is-invalid{% endif %}">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                {{ form.confirm_password }}
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#id_confirm_password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                             {% for error in form.confirm_password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+
                         <input type="hidden" name="face_samples" id="face_samples_input">
 
                         <hr class="my-4">
@@ -129,7 +198,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script type="module">
-  
     const video = document.getElementById('video');
     const overlayCanvas = document.getElementById('overlay_canvas');
     const canvasCtx = overlayCanvas.getContext('2d');
@@ -142,11 +210,9 @@
     const TOTAL_SAMPLES = 20;
     const CAPTURE_INTERVAL_MS = 400; 
     let faceSamples = [];
-    
     let isCapturing = false;
     let lastCaptureTime = 0;
 
-    
     const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
     faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
     faceMesh.onResults(onResults);
@@ -154,16 +220,13 @@
     const camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
     camera.start();
 
-  
     function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-
             drawConnectors(canvasCtx, results.multiFaceLandmarks[0], window.FACEMESH_OVAL, {color: 'var(--success-color)', lineWidth: 3});
             
-        
             if (isCapturing && faceSamples.length < TOTAL_SAMPLES) {
                 const now = Date.now();
                 if (now - lastCaptureTime > CAPTURE_INTERVAL_MS) {
@@ -175,7 +238,6 @@
         canvasCtx.restore();
     }
 
-  
     startCaptureBtn.addEventListener('click', () => {
         isCapturing = true;
         startCaptureBtn.disabled = true;
@@ -213,8 +275,37 @@
         cameraContainer.classList.remove('pulsing-border');
         cameraContainer.style.borderColor = 'var(--success-color)';
         progressText.style.color = 'var(--success-color)';
+        
         submitBtn.disabled = false;
         faceSamplesInput.value = JSON.stringify(faceSamples);
     }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                // The data-target attribute should point to the ID of the password input.
+                // Django forms automatically generate IDs like 'id_fieldname'.
+                const targetInput = document.querySelector(this.dataset.target);
+                const icon = this.querySelector('i');
+
+                if (targetInput) {
+                    // Check the current type of the input field
+                    const currentType = targetInput.getAttribute('type');
+
+                    // Switch the type between 'password' and 'text'
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    targetInput.setAttribute('type', newType);
+
+                    // Switch the icon class between 'bi-eye' and 'bi-eye-slash'
+                    icon.classList.toggle('bi-eye');
+                    icon.classList.toggle('bi-eye-slash');
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

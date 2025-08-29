@@ -106,6 +106,9 @@
                             <div class="input-group mb-4">
                                 <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
                                 {{ form.password }}
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#id_password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -130,4 +133,32 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select all buttons with the class 'toggle-password'
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                // The data-target attribute should point to the ID of the password input.
+                // Django forms automatically generate IDs like 'id_fieldname', so '#id_password' is correct.
+                const targetInput = document.querySelector(this.dataset.target);
+                const icon = this.querySelector('i');
+
+                if (targetInput) {
+                    // Switch the type between 'password' and 'text'
+                    const newType = targetInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    targetInput.setAttribute('type', newType);
+
+                    // Switch the icon class between 'bi-eye' and 'bi-eye-slash'
+                    icon.classList.toggle('bi-eye');
+                    icon.classList.toggle('bi-eye-slash');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
