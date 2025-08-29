@@ -282,7 +282,11 @@ def lecturer_dashboard(request):
     # Aggregate totals
     total_courses = courses.count()
     total_sessions = AttendanceSession.objects.filter(course__lecturer=request.user).count()
-    total_students = Student.objects.filter(records__session__course__lecturer=request.user).distinct().count()
+    total_students = Student.objects.filter(
+        records__session__course__lecturer=request.user, 
+        user__is_staff=False
+    ).distinct().count()
+
 
     context = {
         'courses': courses,
@@ -452,7 +456,6 @@ def export_session_pdf(request, session_id):
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename=f'attendance_{session.course.course_code}_{session.id}.pdf')
 
-
 @csrf_exempt
 @login_required
 @user_passes_test(is_lecturer)
@@ -485,11 +488,11 @@ def process_frame(request):
 
         x, y, w, h = faces[0]
         face_roi = gray[y:y+h, x:x+w]
-        
-        best_match_student = None
-        min_confidence = float('inf')  # Start with an infinitely high 'difference' score
 
-        students = Student.objects.select_related('user').all()
+        students = session.course.enrolled_students.select_related('user').all()
+        
+        if not students:
+            return JsonResponse({'status': 'error', 'message': 'No students are enrolled in this course.'})
         
         recognized_student = None
         recognition_confidence = 100 
@@ -506,19 +509,17 @@ def process_frame(request):
                 recognizer.read(temp_f.name)
 
                 label, confidence = recognizer.predict(face_roi)
-                
-                if confidence < min_confidence:
-                    min_confidence = confidence
-                    best_match_student = student
-        
-        # Now, after checking all students, decide if the best match is good enough.
-        CONFIDENCE_THRESHOLD = 60
 
-        if best_match_student and min_confidence < CONFIDENCE_THRESHOLD:
+                if label == student.user.id and confidence < 65:
+                    recognized_student = student
+                    recognition_confidence = confidence
+                    break
+
+        if recognized_student:
             current_status = 'on_time' if timezone.now() <= session.end_time else 'late'
             
             record, created = AttendanceRecord.objects.get_or_create(
-                student=best_match_student,
+                student=recognized_student,
                 session=session,
                 defaults={'status': current_status}
             )
@@ -526,16 +527,17 @@ def process_frame(request):
             if created:
                 return JsonResponse({
                     'status': 'success',
-                    'student_name': best_match_student.user.get_full_name(),
-                    'matric_number': best_match_student.matric_number,
+                    'student_name': recognized_student.user.get_full_name(),
+                    'matric_number': recognized_student.matric_number,
                     'timestamp': record.timestamp.strftime('%I:%M:%S %p'),
                     'attendance_status': record.get_status_display()
                 })
             else:
                 return JsonResponse({
                     'status': 'already_marked',
-                    'student_name': best_match_student.user.get_full_name()
+                    'student_name': recognized_student.user.get_full_name()
                 })
+        
         return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
 
     except Exception as e:
@@ -641,7 +643,7 @@ def password_reset_complete(request):
     
 @login_required
 def student_list(request):
-    student_list = Student.objects.select_related('user').order_by('user__last_name', 'user__first_name')
+    student_list = Student.objects.filter(user__is_staff=False).select_related('user').order_by('user__last_name', 'user__first_name')
     
     query = request.GET.get('q')
     if query:

@@ -92,6 +92,12 @@ class CourseForm(forms.ModelForm):
             'course_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., CSC415'}),
         }
         
+        def clean_course_code(self):
+            course_code = self.cleaned_data.get('course_code')
+            if Course.objects.filter(course_code__iexact=course_code).exists():
+                raise forms.ValidationError("A course with this code already exists. Please choose another.")
+            return course_code
+        
 class SessionCreationForm(forms.Form):
     end_time = forms.DateTimeField(
         label="Session End Time",
