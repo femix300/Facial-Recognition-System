@@ -4,13 +4,12 @@
 
 {% block styles %}
 <style>
-
     .hero-section {
         background: linear-gradient(rgba(0, 35, 102, 0.85), rgba(0, 35, 102, 0.85)), url('{% static "images/hero-background.jpg" %}');
         background-size: cover;
         background-position: center;
         color: white;
-        padding: 6rem 1rem;
+        padding: 3rem 3rem;
         text-align: center;
     }
     .hero-section h1 {
@@ -23,10 +22,7 @@
         max-width: 800px;
         margin: 1.5rem auto;
     }
-    .features-section {
-        padding: 5rem 1rem;
-        background-color: var(--body-bg); 
-    }
+
     .feature-card {
         border: none;
         background: #ffffff;
@@ -47,9 +43,19 @@
         margin-bottom: 1.5rem;
         display: inline-block;
     }
+    .features-box {
+        border-radius: 1rem;
+        padding: 5rem 5rem;
+        background-color:rgba(0, 35, 102, 0.85));
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.08);
+
+    }
+
     .how-it-works-section {
-        padding: 5rem 1rem;
+        border-radius: 1rem;
+        padding: 5rem 5rem;
         background-color: #ffffff;
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.08);
     }
     .step-indicator {
         width: 60px;
@@ -66,58 +72,60 @@
         box-shadow: 0 5px 15px rgba(0, 86, 179, 0.3);
     }
 </style>
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="hero-section rounded-3 mb-5 shadow-lg">
+<div class="hero-section rounded-3 mb-5 shadow-lg" data-aos="fade-up">
     <div class="container">
         <h1 class="display-4">Seamless Attendance, Secured by Face.</h1>
         <p class="lead">
             The future of attendance management is here. Our system uses advanced facial recognition to provide a fast, secure, and touchless experience.
         </p>
         <div>
-    {% if user.is_authenticated %}
-        <a href="{% url 'student_dashboard' %}" class="btn btn-light btn-lg fw-bold px-4 me-2 mt-2">
-            <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
-        </a>
-        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-lg fw-bold px-4 mt-2">
-            <i class="bi bi-box-arrow-right me-2"></i>Logout
-        </a>
-    {% else %}
-        <a href="{% url 'student_registration' %}" class="btn btn-light btn-lg fw-bold px-4 me-2 mt-2">
-            <i class="bi bi-person-plus-fill me-2"></i>Register as a Student
-        </a>
-        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg fw-bold px-4 mt-2">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Login
-        </a>
-    {% endif %}
-</div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'student_dashboard' %}" class="btn btn-light btn-lg fw-bold px-4 me-2 mt-2">
+                <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-lg fw-bold px-4 mt-2">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+        {% else %}
+            <a href="{% url 'student_registration' %}" class="btn btn-light btn-lg fw-bold px-4 me-2 mt-2">
+                <i class="bi bi-person-plus-fill me-2"></i>Register as a Student
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg fw-bold px-4 mt-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </a>
+        {% endif %}
+        </div>
     </div>
 </div>
 
-<div class="features-section">
+<div class="features-box mb-5" data-aos="fade-up" data-aos-delay="100">
     <div class="container">
-        <h2 class="text-center fw-bold display-5 mb-5">Why Choose Our System?</h2>
-        <div class="row g-4">
-            <div class="col-lg-4 d-flex align-items-stretch">
-                <div class="feature-card">
-                    <div class="icon"><i class="bi bi-camera-video-fill"></i></div>
-                    <h4 class="fw-bold">Real-Time Liveness</h4>
-                    <p class="text-muted">Multi-step, randomized liveness detection ensures the user is physically present, preventing spoofing with photos or videos.</p>
+            <h2 class="text-center fw-bold display-5 mb-5">Why Choose Our System?</h2>
+            <div class="row g-4">
+                <div class="col-lg-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="icon"><i class="bi bi-camera-video-fill"></i></div>
+                        <h4 class="fw-bold">Real-Time Liveness</h4>
+                        <p class="text-muted">Multi-step, randomized liveness detection ensures the user is physically present, preventing spoofing with photos or videos.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-4 d-flex align-items-stretch">
-                <div class="feature-card">
-                    <div class="icon"><i class="bi bi-shield-lock-fill"></i></div>
-                    <h4 class="fw-bold">Secure & Accurate</h4>
-                    <p class="text-muted">Using advanced computer vision, the system provides highly accurate recognition while storing all data securely.</p>
+                <div class="col-lg-4 d-flex align-items-stretch"data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="icon"><i class="bi bi-shield-lock-fill"></i></div>
+                        <h4 class="fw-bold">Secure & Accurate</h4>
+                        <p class="text-muted">Using advanced computer vision, the system provides highly accurate recognition while storing all data securely.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-4 d-flex align-items-stretch">
-                <div class="feature-card">
-                    <div class="icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
-                    <h4 class="fw-bold">Instant Reporting</h4>
-                    <p class="text-muted">Lecturers can instantly view attendance records and export professional, formatted PDF reports for official use.</p>
+                <div class="col-lg-4 d-flex align-items-stretch"data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                        <h4 class="fw-bold">Instant Reporting</h4>
+                        <p class="text-muted">Lecturers can instantly view attendance records and export professional, formatted PDF reports for official use.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,19 +134,19 @@
 
 <div class="how-it-works-section">
     <div class="container">
-        <h2 class="text-center fw-bold display-5 mb-5">A Simple & Secure Process</h2>
+        <h2 class="text-center fw-bold display-5 mb-5" data-aos="fade-up">A Simple & Secure Process</h2>
         <div class="row g-5 text-center">
-            <div class="col-md-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="step-indicator">1</div>
                 <h4 class="fw-bold mt-3">Register Your Profile</h4>
                 <p class="text-muted">Students create a secure profile once, capturing face samples from their own device. The system ensures only high-quality data is saved.</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                 <div class="step-indicator">2</div>
                 <h4 class="fw-bold mt-3">Mark Attendance</h4>
                 <p class="text-muted">The lecturer initiates a session on a single device. Students simply look at the camera and perform a quick liveness check to be marked present instantly.</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
                 <div class="step-indicator">3</div>
                 <h4 class="fw-bold mt-3">View Reports</h4>
                 <p class="text-muted">Lecturers and students can log in to their respective dashboards to view detailed attendance history anytime, anywhere.</p>
@@ -147,3 +155,14 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({
+        once: false, // animations repeat when scrolling back
+        duration: 1000,
+    });
+</script>
+{% endblock %}
+ 
