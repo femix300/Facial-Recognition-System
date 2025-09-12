@@ -72,6 +72,13 @@
         70% { box-shadow: 0 0 0 10px rgba(0, 86, 179, 0); }
         100% { box-shadow: 0 0 0 0 rgba(0, 86, 179, 0); }
     }
+
+    /* Camera error message */
+    #retryMsg {
+        color: var(--danger-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
 </style>
 
 <div class="container my-4 my-lg-5">
@@ -169,14 +176,20 @@
 
                         <hr class="my-4">
 
-                        <h4 class="mb-3 text-center">Step 2: Face Capture</h4>
+                        <h4 class="mb-1 text-center">Step 2: Face Capture</h4>
                         <div class="d-flex flex-column align-items-center">
                             <div id="camera-container" class="shadow-sm" style="width: 250px; height: 250px;">
                                 <video id="video" style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);" autoplay playsinline muted></video>
                                 <canvas id="overlay_canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1);"></canvas>
                             </div>
-                            <p id="progress-text" class="mt-3 fs-5 fw-bold text-muted">0 / 20 Samples</p>
-                            <button type="button" id="startCaptureBtn" class="btn btn-primary btn-lg mt-2" style="width: 250px;">
+                            <p id="progress-text" class="mt-2 fs-5 fw-bold text-muted mb-2">0 / 20 Samples</p>
+                            <div class="progress mt-1" style="height: 10px; width: 250px;">
+                            <div id="progress-bar" class="progress-bar bg-success" role="progressbar" 
+                                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="20"></div>
+                            </div>
+
+                            <!-- Disabled by default -->
+                            <button type="button" id="startCaptureBtn" class="btn btn-primary btn-lg mt-2" style="width: 250px;" disabled>
                                 <i class="bi bi-camera-fill me-2"></i> Start Capture
                             </button>
                         </div>
@@ -217,8 +230,47 @@
     faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
     faceMesh.onResults(onResults);
 
-    const camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
-    camera.start();
+    const camera = new Camera(video, { 
+        onFrame: async () => { await faceMesh.send({image: video}); }, 
+        width: 640, 
+        height: 480 
+    });
+
+    camera.start().catch(err => {
+        console.error("Camera access failed:", err);
+
+        let retryMsg = document.getElementById("retryMsg");
+        if (!retryMsg) {
+            retryMsg = document.createElement("p");
+            retryMsg.id = "retryMsg";
+            retryMsg.textContent = "Camera access blocked. Please allow camera to continue.";
+            progressText.insertAdjacentElement("afterend", retryMsg);
+        }
+
+        startCaptureBtn.textContent = "Grant Camera Access";
+        startCaptureBtn.classList.remove("btn-primary");
+        startCaptureBtn.classList.add("btn-outline-danger");
+
+        startCaptureBtn.onclick = () => {
+            startCaptureBtn.disabled = true;
+            startCaptureBtn.textContent = "Retrying...";
+
+            camera.start()
+                .then(() => {
+                    retryMsg.remove();
+                    startCaptureBtn.disabled = false;
+                    startCaptureBtn.innerHTML = '<i class="bi bi-camera-fill me-2"></i> Start Capture';
+                    startCaptureBtn.classList.remove("btn-outline-danger");
+                    startCaptureBtn.classList.add("btn-primary");
+                    startCaptureBtn.onclick = startCaptureFlow;
+                })
+                .catch(err => {
+                    console.error("Retry failed:", err);
+                    startCaptureBtn.disabled = false;
+                    startCaptureBtn.textContent = "Grant Camera Access";
+                });
+        };
+    });
 
     function onResults(results) {
         canvasCtx.save();
@@ -238,13 +290,15 @@
         canvasCtx.restore();
     }
 
-    startCaptureBtn.addEventListener('click', () => {
+    function startCaptureFlow() {
         isCapturing = true;
         startCaptureBtn.disabled = true;
         startCaptureBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Capturing...';
         cameraContainer.classList.add('pulsing-border');
         cameraContainer.style.borderColor = 'var(--primary-color)';
-    });
+    }
+
+    startCaptureBtn.onclick = startCaptureFlow;
 
     function captureSample() {
         const canvas = document.createElement('canvas');
@@ -262,8 +316,14 @@
     }
 
     function updateProgress() {
-        progressText.textContent = `${faceSamples.length} / ${TOTAL_SAMPLES} Samples`;
-        if (faceSamples.length >= TOTAL_SAMPLES) {
+        const progress = faceSamples.length;
+        progressText.textContent = `${progress} / ${TOTAL_SAMPLES} Samples`;
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercent = (progress / TOTAL_SAMPLES) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+
+        if (progress >= TOTAL_SAMPLES) {
             completeCapture();
         }
     }
@@ -287,25 +347,41 @@
 
         togglePasswordButtons.forEach(button => {
             button.addEventListener('click', function () {
-                // The data-target attribute should point to the ID of the password input.
-                // Django forms automatically generate IDs like 'id_fieldname'.
                 const targetInput = document.querySelector(this.dataset.target);
                 const icon = this.querySelector('i');
 
                 if (targetInput) {
-                    // Check the current type of the input field
                     const currentType = targetInput.getAttribute('type');
-
-                    // Switch the type between 'password' and 'text'
                     const newType = currentType === 'password' ? 'text' : 'password';
                     targetInput.setAttribute('type', newType);
 
-                    // Switch the icon class between 'bi-eye' and 'bi-eye-slash'
                     icon.classList.toggle('bi-eye');
                     icon.classList.toggle('bi-eye-slash');
                 }
             });
         });
+
+        // NEW: Block Start Capture until Step 1 is filled & passwords match
+        const requiredFields = [
+            document.getElementById("id_first_name"),
+            document.getElementById("id_last_name"),
+            document.getElementById("id_email"),
+            document.getElementById("id_matric_number"),
+            document.getElementById("id_password"),
+            document.getElementById("id_confirm_password")
+        ];
+        const startCaptureBtn = document.getElementById("startCaptureBtn");
+
+        function validateFields() {
+            let allFilled = requiredFields.every(f => f && f.value.trim());
+            let passwordsMatch = requiredFields[4].value && requiredFields[4].value === requiredFields[5].value;
+
+            startCaptureBtn.disabled = !(allFilled && passwordsMatch);
+        }
+
+        requiredFields.forEach(field => field && field.addEventListener("input", validateFields));
+        validateFields();
     });
 </script>
 {% endblock %}
+
