@@ -31,7 +31,7 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 
 #ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='127.0.0.1').split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
 # Application definition
 
@@ -125,7 +125,7 @@ EMAIL_HOST_USER =  config('EMAIL_HOST_USER', default="placeholder")
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default="placheholder") # Loaded from .env file for security
 
 # Format: "Display Name <email@address.com>"
-DEFAULT_FROM_EMAIL = 'Smart Attendance System <placeholder>'
+DEFAULT_FROM_EMAIL = 'Smart Attendance System <iammorttix@gmail.com>'
 
 
 # Internationalization
