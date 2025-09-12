@@ -6,7 +6,12 @@ import uuid
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     matric_number = models.CharField(max_length=100, unique=True, verbose_name="Matriculation Number")
-    lbph_model_data = models.TextField()
+    face_encodings_data = models.TextField(
+        null=True,
+        blank=True,
+        help_text="JSON-encoded list of 128-dimensional face encodings from dlib."
+    )
+
 
     def __str__(self):
         return self.user.get_full_name()

@@ -45,6 +45,16 @@
         text-align: center;
         transition: all 0.5s ease-in-out;
     }
+    .challenge-icon {
+        font-size: 2rem;
+        margin: 0 10px;
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+    }
+    .challenge-icon.active {
+        opacity: 1;
+        color: var(--primary-color);
+    }
     
     .challenge-icon { display: none; margin-bottom: 1.5rem; height: 60px; }
     .challenge-icon.active { display: block; }
@@ -114,24 +124,32 @@
         <div class="row align-items-center">
             <div class="col-lg-7 d-flex flex-column align-items-center justify-content-center">
                 <h2 class="text-center mb-3">Attendance for <strong>{{ course.course_name }}</strong></h2>
-                
-                <div class="challenge-icon" id="mouth-icon"><div id="mouth-icon-shape"></div></div>
-                <div class="challenge-icon" id="head-turn-icon"><i class="bi bi-person-badge"></i></div>
 
-                <div id="camera-container" class="shadow-lg mx-auto" style="width: 100%; max-width: 400px; aspect-ratio: 1/1;">
+                <!-- Challenge Icons Row -->
+                <div id="challenge-icons" class="mb-3">
+                    <i id="blink-icon" class="bi bi-eye challenge-icon"></i>
+                    <i id="mouth-icon" class="bi bi-mouth challenge-icon"></i>
+                    <i id="head-turn-icon" class="bi bi-arrow-repeat challenge-icon"></i>
+                    <i id="move-icon" class="bi bi-arrows-fullscreen challenge-icon"></i>
+                    <i id="smile-icon" class="bi bi-emoji-smile challenge-icon"></i>
+                </div>
+
+                <!-- Camera + Overlay -->
+                <div id="camera-container" class="shadow-lg mx-auto" style="width: 100%; max-width: 400px; aspect-ratio: 1/1; position: relative;">
                     <video id="video" class="w-100 h-100" style="object-fit: cover; transform: scaleX(-1);" autoplay playsinline muted></video>
                     <canvas id="overlay_canvas" class="w-100 h-100" style="position: absolute; top: 0; left: 0; transform: scaleX(-1);"></canvas>
                     <div id="result-overlay" class="result-overlay">
                         <div id="result-icon" class="icon"></div>
                         <h3 id="result-name" class="name"></h3>
-                        <p id="result-message" class="message"></p> 
+                        <p id="result-message" class="message"></p>
                     </div>
                 </div>
-                
+
                 <div id="progress-dots" class="progress-dots"></div>
                 <h3 id="status" class="mt-4 text-center">Initializing Camera...</h3>
             </div>
 
+            <!-- Attendance Log -->
             <div class="col-lg-5 mt-4 mt-lg-0">
                 <div class="log-panel p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3 px-2">
@@ -158,6 +176,7 @@
         <i class="bi bi-stop-circle-fill me-2"></i> End Session
     </a>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -167,8 +186,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script type="module">
-    // --- Get references to all UI elements ---
-  
+    // --- UI References ---
     const video = document.getElementById('video');
     const statusDiv = document.getElementById('status');
     const attendanceLog = document.getElementById('attendance-log');
@@ -183,15 +201,41 @@
     const resultIcon = document.getElementById('result-icon');
     const resultName = document.getElementById('result-name');
     const sessionId = "{{ session.id }}";
-    
-    // The blinkState variable has been removed
-    
+
     let isProcessing = false;
     let isTransitioning = false;
 
-  
+    // --- Helper: Eye Aspect Ratio (EAR) for Blink Detection ---
+    function calculateEAR(landmarks, leftEyeIndices, rightEyeIndices) {
+        function euclideanDist(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+        function eyeEAR(eye) {
+            const A = euclideanDist(eye[1], eye[5]);
+            const B = euclideanDist(eye[2], eye[4]);
+            const C = euclideanDist(eye[0], eye[3]);
+            return (A + B) / (2.0 * C);
+        }
+        return (eyeEAR(leftEyeIndices.map(i => landmarks[i])) + eyeEAR(rightEyeIndices.map(i => landmarks[i]))) / 2.0;
+    }
+
+    const leftEyeIdx = [33, 160, 158, 133, 153, 144];
+    const rightEyeIdx = [263, 387, 385, 362, 380, 373];
+
+    // --- Anti-Spoofing Challenges ---
     const challenges = {
-        // The BLINK challenge object has been removed
+        BLINK: {
+            instruction: "Please Blink Twice",
+            iconId: "blink-icon",
+            detectionFunction: (landmarks, frameHistory) => {
+                const ear = calculateEAR(landmarks, leftEyeIdx, rightEyeIdx);
+                if (ear < 0.20) {
+                    frameHistory.blinks = (frameHistory.blinks || 0) + 1;
+                }
+                return frameHistory.blinks >= 2;
+            }
+        
+        },
         MOUTH_OPEN: {
             instruction: "Please Open Your Mouth",
             iconId: "mouth-icon",
@@ -200,14 +244,9 @@
                 const bottomLip = landmarks[14];
                 const leftCorner = landmarks[61];
                 const rightCorner = landmarks[291];
-        
                 const verticalDist = Math.hypot(topLip.y - bottomLip.y, topLip.x - bottomLip.x);
                 const horizontalDist = Math.hypot(leftCorner.y - rightCorner.y, leftCorner.x - rightCorner.x);
-                
-                if (horizontalDist === 0) return false;
-        
-                const mar = verticalDist / horizontalDist;
-                return mar > 0.5; // Threshold for a clearly open mouth
+                return (verticalDist / horizontalDist) > 0.5;
             }
         },
         TURN_HEAD: {
@@ -218,28 +257,57 @@
                 const turnRatio = Math.abs(nose.x - leftEdge.x) / Math.abs(nose.x - rightEdge.x);
                 return turnRatio > 2.0 || (1 / turnRatio) > 2.0;
             }
+        },
+        MOVE_FORWARD: {
+            instruction: "Please Move Closer to the Camera",
+            iconId: "move-icon",
+            detectionFunction: (landmarks, frameHistory) => {
+                const noseY = landmarks[1].y;
+                frameHistory.noseYHistory = frameHistory.noseYHistory || [];
+                frameHistory.noseYHistory.push(noseY);
+                if (frameHistory.noseYHistory.length > 10) frameHistory.noseYHistory.shift();
+                const diff = Math.max(...frameHistory.noseYHistory) - Math.min(...frameHistory.noseYHistory);
+                return diff > 0.05; // noticeable forward/backward motion
+            }
+        },
+        SMILE: {
+            instruction: "Please Smile",
+            iconId: "smile-icon",
+            detectionFunction: (landmarks) => {
+                const leftCorner = landmarks[61];
+                const rightCorner = landmarks[291];
+                const topLip = landmarks[13];
+                const bottomLip = landmarks[14];
+
+                const mouthWidth = Math.hypot(leftCorner.x - rightCorner.x, leftCorner.y - rightCorner.y);
+                const mouthHeight = Math.hypot(topLip.x - bottomLip.x, topLip.y - bottomLip.y);
+
+                const smileRatio = mouthWidth / mouthHeight;
+                return smileRatio > 3.0; // higher ratio indicates smiling
+            }
         }
     };
-    
+
     let challengeSequence = [];
     let currentChallengeIndex = 0;
+    let frameHistory = {};
 
-    // --- 2. STATE MACHINE & UI FUNCTIONS ---
+    // --- Challenge Flow ---
     function generateChallengeSequence() {
         const challengeKeys = Object.keys(challenges);
         for (let i = challengeKeys.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [challengeKeys[i], challengeKeys[j]] = [challengeKeys[j], challengeKeys[i]];
         }
-        const numChallenges = Math.floor(Math.random() * 2) + 1; // 1 or 2 challenges
+        const numChallenges = Math.floor(Math.random() * 3) + 2; // 2–4 challenges
         challengeSequence = challengeKeys.slice(0, numChallenges);
         currentChallengeIndex = 0;
+        frameHistory = {};
     }
 
     function startLivenessCheck() {
         isProcessing = false;
         resultOverlay.classList.remove('show');
-        // The blinkState reset line has been removed
         generateChallengeSequence();
         updateInstruction();
     }
@@ -248,10 +316,8 @@
         if (currentChallengeIndex >= challengeSequence.length) return;
         const currentChallengeKey = challengeSequence[currentChallengeIndex];
         statusDiv.textContent = challenges[currentChallengeKey].instruction;
-        
         document.querySelectorAll('.challenge-icon').forEach(icon => icon.classList.remove('active'));
         document.getElementById(challenges[currentChallengeKey].iconId).classList.add('active');
-
         progressDotsContainer.innerHTML = '';
         for (let i = 0; i < challengeSequence.length; i++) {
             const dot = document.createElement('div');
@@ -260,63 +326,50 @@
         }
     }
 
-  
+    // --- Mediapipe Setup ---
     const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
     faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
     faceMesh.onResults(onResults);
-    
+
     const camera = new Camera(video, { onFrame: async () => { await faceMesh.send({image: video}); }, width: 640, height: 480 });
-    
 
-    camera.start()
-        .then(() => {
-            overlayCanvas.width = video.videoWidth;
-            overlayCanvas.height = video.videoHeight;
-            startLivenessCheck();
-        })
-        .catch(err => {
-            console.error("Camera Error:", err);
-            statusDiv.textContent = "Camera access denied or unavailable.";
-            cameraContainer.style.borderColor = 'var(--error-color)';
-        });
+    camera.start().then(() => {
+        overlayCanvas.width = video.videoWidth;
+        overlayCanvas.height = video.videoHeight;
+        startLivenessCheck();
+    }).catch(err => {
+        console.error("Camera Error:", err);
+        statusDiv.textContent = "Camera access denied or unavailable.";
+        cameraContainer.style.borderColor = 'var(--error-color)';
+    });
 
+    // --- Main Results ---
     function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    
-        // Block processing during transitions or when sending data
-        if (isProcessing || isTransitioning) { 
-            canvasCtx.restore(); 
-            return; 
-        }
-    
+        if (isProcessing || isTransitioning) { canvasCtx.restore(); return; }
+
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
             drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: 'var(--neutral-color)', lineWidth: 1});
             cameraContainer.style.borderColor = 'var(--primary-color)';
-    
+
             const currentChallengeKey = challengeSequence[currentChallengeIndex];
             if (!currentChallengeKey) { canvasCtx.restore(); return; }
             const challenge = challenges[currentChallengeKey];
-    
-            if (challenge.detectionFunction(landmarks)) {
-                isTransitioning = true; // Start the transition to block other actions
+
+            if (challenge.detectionFunction(landmarks, frameHistory)) {
+                isTransitioning = true;
                 currentChallengeIndex++;
-    
                 if (currentChallengeIndex >= challengeSequence.length) {
-                    isProcessing = true; 
+                    isProcessing = true;
                     isTransitioning = false;
                     statusDiv.textContent = 'Liveness Confirmed!';
-                    drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: 'var(--success-color)', lineWidth: 2});
                     cameraContainer.style.borderColor = 'var(--success-color)';
                     setTimeout(captureAndSendImage, 500);
                 } else {
-                    // Show temporary feedback, then show the next instruction
                     statusDiv.textContent = '✅ Great! Next...';
-                    setTimeout(() => {
-                        updateInstruction();
-                        isTransitioning = false; // End transition, ready for next detection
-                    }, 1200); // 1.2 second pause for user to see feedback
+                    setTimeout(() => { updateInstruction(); isTransitioning = false; }, 1200);
                 }
             }
         } else {
@@ -325,6 +378,7 @@
         canvasCtx.restore();
     }
 
+    // --- Capture & Send ---
     function captureAndSendImage() {
         captureCanvas.width = video.videoWidth; 
         captureCanvas.height = video.videoHeight;
@@ -334,9 +388,9 @@
         ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
         const imageData = captureCanvas.toDataURL('image/jpeg', 0.9);
 
-        fetch("{% url 'process_frame_api' %}", {
+        fetch("{% url 'process_frame_api' session_id %}", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'}, // Good practice to include CSRF token
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
             body: JSON.stringify({ image: imageData, session_id: sessionId })
         })
         .then(response => response.json())
@@ -347,48 +401,37 @@
         });
     }
 
+    // --- API Response ---
     function handleApiResponse(data) {
         let overlayColor, iconClass, studentName, messageText = '';
-    
         if (data.status === 'success') {
-            overlayColor = 'var(--success-color)';
-            iconClass = 'bi bi-check-circle-fill text-success';
-            studentName = data.student_name;
-            messageText = `Matric: ${data.matric_number}`;
+            overlayColor = 'var(--success-color)'; iconClass = 'bi bi-check-circle-fill text-success';
+            studentName = data.student_name; messageText = `Matric: ${data.matric_number}`;
             updateLog(data.student_name, data.matric_number, new Date().toLocaleTimeString());
         } else if (data.status === 'already_marked') {
-            overlayColor = 'var(--warning-color)';
-            iconClass = 'bi bi-info-circle-fill text-warning';
-            studentName = data.student_name;
-            messageText = "Already marked for this session.";
+            overlayColor = 'var(--warning-color)'; iconClass = 'bi bi-info-circle-fill text-warning';
+            studentName = data.student_name; messageText = "Already marked for this session.";
         } else {
-            overlayColor = 'var(--error-color)';
-            iconClass = 'bi bi-x-circle-fill text-danger';
-            studentName = "Verification Failed";
-            messageText = data.message || "An unknown error occurred.";
+            overlayColor = 'var(--error-color)'; iconClass = 'bi bi-x-circle-fill text-danger';
+            studentName = "Verification Failed"; messageText = data.message || "An unknown error occurred.";
         }
-    
-        // Clear previous message
         document.getElementById('result-message').textContent = '';
-    
         cameraContainer.style.borderColor = overlayColor;
         resultIcon.className = 'icon ' + iconClass;
         resultName.textContent = studentName;
-        document.getElementById('result-message').textContent = messageText; // Set the new message
+        document.getElementById('result-message').textContent = messageText;
         resultOverlay.classList.add('show');
-    
-        setTimeout(startLivenessCheck, 4000); // Increased timeout slightly
+        setTimeout(startLivenessCheck, 4000);
     }
 
+    // --- Attendance Log ---
     function updateLog(studentName, matricNumber, timestamp) {
         const initialItem = attendanceLog.querySelector('.list-group-item.text-center');
         if (initialItem) initialItem.remove();
-        
         const logItem = document.createElement('li');
         logItem.className = 'list-group-item d-flex justify-content-between align-items-center';
         logItem.innerHTML = `<div><strong>${studentName}</strong><br><small>${matricNumber}</small></div> <span class="badge bg-light text-dark rounded-pill">${timestamp}</span>`;
         attendanceLog.prepend(logItem);
-        
         lastStudentSpan.textContent = studentName;
         attendeeCount.textContent = attendanceLog.children.length;
     }

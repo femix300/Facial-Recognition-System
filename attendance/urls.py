@@ -39,6 +39,6 @@ urlpatterns = [
     path('dashboard/session/<int:session_id>/pdf/', views.export_session_pdf, name='export_session_pdf'),
     
     # API Endpoint for Face Recognition
-    path('api/process-frame/', views.process_frame, name='process_frame_api'),
+    path('api/process-frame/<int:session_id>/', views.process_frame, name='process_frame_api'),
     path('profile/delete/', views.delete_account, name='delete_account'),
 ]

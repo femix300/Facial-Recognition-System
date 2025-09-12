@@ -20,6 +20,8 @@ import json
 import tempfile
 from datetime import date
 import cv2
+import os
+import dlib
 import logging
 import numpy as np
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -30,10 +32,23 @@ from reportlab.lib.styles import getSampleStyleSheet
 from .models import Student, Course, AttendanceSession, AttendanceRecord, PasswordReset
 from .forms import LoginForm, RegistrationForm, LecturerRegistrationForm, CourseForm, SessionCreationForm, LecturerProfileUpdateForm, StudentProfileUpdateForm
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SHAPE_PREDICTOR_PATH = os.path.join(BASE_DIR, 'dlib_models', 'shape_predictor_68_face_landmarks.dat')
+FACE_REC_MODEL_PATH = os.path.join(BASE_DIR, 'dlib_models', 'dlib_face_recognition_resnet_model_v1.dat')
+
+# Initialize dlib models (loading them once is more efficient)
+try:
+    shape_predictor = dlib.shape_predictor(SHAPE_PREDICTOR_PATH)
+    face_recognizer = dlib.face_recognition_model_v1(FACE_REC_MODEL_PATH)
+    face_detector = dlib.get_frontal_face_detector()
+except RuntimeError as e:
+    logger.error(f"Failed to load dlib models: {e}. Please check model paths.")
+    shape_predictor = None
+    face_recognizer = None
+    face_detector = None
+
 
 logger = logging.getLogger(__name__)
-
-HAAR_CASCADE_PATH = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 
 
 def is_lecturer(user):
@@ -43,52 +58,97 @@ def is_student(user):
     return not user.is_staff and hasattr(user, 'student')
 
 
-def train_lbph_model_from_samples(face_samples_b64: list, user_id: int) -> str:
+def train_dlib_model_from_samples(face_samples_b64: list) -> str:
+    """
+    Processes a list of base64 encoded images to extract dlib face encodings.
 
-    face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
-    
-    face_samples = []
-    ids = []
+    Args:
+        face_samples_b64: A list of base64 encoded image strings.
+
+    Returns:
+        A JSON string containing a list of 128-d face encodings.
+
+    Raises:
+        ValueError: If dlib models are not loaded or if insufficient valid faces are found.
+    """
+    if not all([face_detector, shape_predictor, face_recognizer]):
+        raise ValueError("Dlib models are not loaded. Check server logs for details.")
+
+    face_encodings = []
 
     for b64_img in face_samples_b64:
         try:
-
             _format, img_str = b64_img.split(';base64,')
-   
             image_data = base64.b64decode(img_str)
-          
             nparr = np.frombuffer(image_data, np.uint8)
-            
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-            
-            if len(faces) == 1:
-                x, y, w, h = faces[0]
 
-                face_samples.append(gray[y:y+h, x:x+w])
-                ids.append(user_id)
+            # dlib works with RGB images, while OpenCV uses BGR
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+            # Detect faces using dlib's detector
+            detected_faces = face_detector(rgb_img, 1)
+
+            if len(detected_faces) != 1:
+                # Skip images that don't have exactly one face
+                print("Skipping image: Found {} faces.".format(len(detected_faces)))
+                continue
+
+            # Get the shape (landmarks) for the detected face
+            shape = shape_predictor(rgb_img, detected_faces[0])
+
+            # Compute the 128-d face encoding
+            encoding = face_recognizer.compute_face_descriptor(rgb_img, shape)
+            face_encodings.append(list(encoding))
+
         except Exception as e:
-
             print(f"Skipping a problematic image sample. Error: {e}")
             continue
 
-    
-    if len(face_samples) < 10:
-        raise ValueError(f"Insufficient valid face samples. Found {len(face_samples)}, need at least 10.")
+    if len(face_encodings) < 5:  # dlib is robust, so we can require fewer samples
+        raise ValueError(f"Insufficient valid face samples. Found {len(face_encodings)}, need at least 5.")
 
+    return json.dumps(face_encodings)
     
-    recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.train(face_samples, np.array(ids))
-    
-    with tempfile.NamedTemporaryFile(delete=True, suffix='.yml') as temp_f:
-        recognizer.write(temp_f.name)
-        temp_f.seek(0)
-        model_bytes = temp_f.read()
-    return base64.b64encode(model_bytes).decode('utf-8')
+def find_best_match(known_encodings_data, unknown_encoding, tolerance=0.5):
+    """
+    Finds the best student match for a given face encoding.
 
+    Args:
+        known_encodings_data (dict): A dictionary mapping student_id to a list of their known face encodings.
+        unknown_encoding (dlib.vector): The face encoding detected in the current frame.
+        tolerance (float): The maximum distance for a face to be considered a match.
+                           Lower is stricter. 0.6 is a good default.
+
+    Returns:
+        A tuple (student_id, distance) for the best match, or (None, None) if no match is found.
+    """
+    best_match_student_id = None
+    min_distance = float('inf')
+
+    # Convert the unknown encoding to a NumPy array for vectorized operations
+    unknown_encoding_np = np.array(unknown_encoding)
+
+    for student_id, encodings_list in known_encodings_data.items():
+        # Convert list of lists to a NumPy array
+        known_encodings_np = np.array(encodings_list)
+
+        # Calculate Euclidean distances between the unknown encoding and all known encodings for this student
+        distances = np.linalg.norm(known_encodings_np - unknown_encoding_np, axis=1)
+
+        # Find the minimum distance for the current student
+        current_min_distance = np.min(distances)
+
+        # Update the best match if this student is a closer match
+        if current_min_distance < min_distance:
+            min_distance = current_min_distance
+            best_match_student_id = student_id
+
+    # If the closest match is within the tolerance, return the student ID
+    if min_distance <= tolerance:
+        return best_match_student_id, min_distance
+
+    return None, None
 
 
 def home(request):
@@ -98,8 +158,7 @@ def home(request):
 
 def student_registration(request):
     """
-    Handles new student registration by leveraging form validation and ensuring
-    database operations are atomic and secure.
+    Handles new student registration, generating and storing dlib face encodings.
     """
     if request.user.is_authenticated:
         return redirect('home')
@@ -108,7 +167,6 @@ def student_registration(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             try:
-
                 with transaction.atomic():
                     user = User.objects.create_user(
                         username=form.cleaned_data['email'],
@@ -117,29 +175,29 @@ def student_registration(request):
                         first_name=form.cleaned_data['first_name'],
                         last_name=form.cleaned_data['last_name']
                     )
+                    
                     face_samples_b64 = json.loads(form.cleaned_data['face_samples'])
-                    model_data = train_lbph_model_from_samples(face_samples_b64, user.id)
+                    # Call the new dlib training function
+                    encodings_data = train_dlib_model_from_samples(face_samples_b64)
                     
                     Student.objects.create(
                         user=user,
                         matric_number=form.cleaned_data['matric_number'],
-                        lbph_model_data=model_data
+                        face_encodings_data=encodings_data  # Save to the new field
                     )
                 
                 messages.success(request, 'Student account created successfully! You can now log in.')
                 return redirect('login')
 
             except ValueError as ve:
-
-                messages.error(request, f"Face recognition setup failed: {ve}. Please try again in better lighting and ensure your face is clear.")
+                messages.error(request, f"Face recognition setup failed: {ve}. Please try again, ensuring your face is clear and well-lit.")
             except Exception as e:
-
                 logger.error(f"An unexpected error occurred during student registration: {e}")
                 messages.error(request, 'An unexpected server error occurred. Please try again.')
     
     else: 
-
         form = RegistrationForm()
+        
     return render(request, 'attendance/registration.html', {'form': form})
 
 
@@ -375,7 +433,8 @@ def attendance_terminal(request, session_id):
     session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
     context = {
         'session': session,
-        'course': session.course 
+        'course': session.course,
+        'session_id': session_id,
     }
     return render(request, 'attendance/terminal.html', context)
 
@@ -457,100 +516,98 @@ def export_session_pdf(request, session_id):
     return FileResponse(buffer, as_attachment=True, filename=f'attendance_{session.course.course_code}_{session.id}.pdf')
 
 @csrf_exempt
-@login_required
 @user_passes_test(is_lecturer)
-def process_frame(request):
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+def process_frame(request, session_id):
+    """
+    Processes a video frame for face recognition using dlib and marks attendance.
+    """
+    session = get_object_or_404(AttendanceSession, id=session_id, course__lecturer=request.user)
+    if not session.is_active:
+        return JsonResponse({'status': 'error', 'message': 'This session is closed.'}, status=400)
 
-    try:
-        data = json.loads(request.body)
-        image_data_url = data.get('image')
-        session_id = data.get('session_id')
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            image_b64 = data.get('image')
+            if not image_b64:
+                return JsonResponse({'status': 'error', 'message': 'No image data provided.'}, status=400)
 
-        if not image_data_url or not session_id:
-            return JsonResponse({'status': 'error', 'message': 'Missing image or session ID.'}, status=400)
-
-        session = get_object_or_404(AttendanceSession, id=session_id)
-
-        # Decode the image and prepare it for processing
-        _format, img_str = image_data_url.split(';base64,')
-        image_data = base64.b64decode(img_str)
-        nparr = np.frombuffer(image_data, np.uint8)
-        gray = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
-
-        # Detect faces in the image
-        face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
-
-        if len(faces) != 1:
-            return JsonResponse({'status': 'error', 'message': 'Please ensure one clear face is visible.'})
-
-        x, y, w, h = faces[0]
-        face_roi = gray[y:y+h, x:x+w]
-        
-        students = Student.objects.select_related('user').all()
-        """
-        students = session.course.enrolled_students.select_related('user').all()
-        
-        if not students:
-            return JsonResponse({'status': 'error', 'message': 'No students are enrolled in this course.'})
-        """
-        
-        recognized_student = None
-        recognition_confidence = 100 
-
-        for student in students:
-            if not student.lbph_model_data:
-                continue
-
-            with tempfile.NamedTemporaryFile(delete=True, suffix='.yml') as temp_f:
-                temp_f.write(base64.b64decode(student.lbph_model_data))
-                temp_f.flush()
-                
-                recognizer = cv2.face.LBPHFaceRecognizer_create()
-                recognizer.read(temp_f.name)
-
-                label, confidence = recognizer.predict(face_roi)
-
-                if label == student.user.id and confidence < 65:
-                    recognized_student = student
-                    recognition_confidence = confidence
-                    break
-
-        if recognized_student:
-            current_status = 'on_time' if timezone.now() <= session.end_time else 'late'
+            # --- Pre-load student encodings (ideally cache this) ---
+            enrolled_students = Student.objects.select_related('user').all()
             
-            record, created = AttendanceRecord.objects.get_or_create(
-                student=recognized_student,
-                session=session,
-                defaults={'status': current_status}
-            )
+            """
+            enrolled_students = session.course.enrolled_students.select_related('user').all()
+            """
+            known_encodings_data = {}
+            for student in enrolled_students:
+                if student.face_encodings_data:
+                    known_encodings_data[student.id] = json.loads(student.face_encodings_data)
 
-            if created:
+            if not known_encodings_data:
+                 return JsonResponse({'status': 'error', 'message': 'No registered face data for students in this course.'}, status=404)
+
+
+            # --- Image Decoding and Face Detection ---
+            _format, img_str = image_b64.split(';base64,')
+            image_data = base64.b64decode(img_str)
+            nparr = np.frombuffer(image_data, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            detected_faces = face_detector(rgb_frame, 1)
+
+            if len(detected_faces) == 0:
+                return JsonResponse({'status': 'no_face', 'message': 'No face detected.'})
+            
+            if len(detected_faces) > 1:
+                return JsonResponse({'status': 'error', 'message': 'Multiple faces detected. Please ensure only one person is in the frame.'}, status=400)
+
+            # --- Face Recognition Logic ---
+            shape = shape_predictor(rgb_frame, detected_faces[0])
+            unknown_encoding = face_recognizer.compute_face_descriptor(rgb_frame, shape)
+
+            student_id, distance = find_best_match(known_encodings_data, unknown_encoding)
+
+            if student_id:
+                student = get_object_or_404(Student, id=student_id)
+                
+                # Check if already marked
+                if AttendanceRecord.objects.filter(session=session, student=student).exists():
+                    return JsonResponse({
+                        'status': 'already_marked',
+                        'message': 'You have already been marked for this session.',
+                        'student_name': student.user.get_full_name(),
+                    })
+
+                # Determine attendance status (on_time or late)
+                status = 'on_time'
+                grace_period = session.start_time + timedelta(minutes=15) # 15-minute grace period
+                if timezone.now() > grace_period:
+                    status = 'late'
+                    
+                # Create attendance record
+                AttendanceRecord.objects.create(session=session, student=student, status=status)
+                
                 return JsonResponse({
                     'status': 'success',
-                    'student_name': recognized_student.user.get_full_name(),
-                    'matric_number': recognized_student.matric_number,
-                    'timestamp': record.timestamp.strftime('%I:%M:%S %p'),
-                    'attendance_status': record.get_status_display()
+                    'student_name': student.user.get_full_name(),
+                    'matric_number': student.matric_number,
+                    'timestamp': timezone.now().strftime('%I:%M %p'),
+                    'message': f"Attendance marked as '{status.replace('_', ' ').title()}'."
                 })
             else:
                 return JsonResponse({
-                    'status': 'already_marked',
-                    'student_name': recognized_student.user.get_full_name()
-                })
-        
-        return JsonResponse({'status': 'error', 'message': 'Face not recognized.'})
+                    'status': 'error',
+                    'message': 'Verification failed. Face not recognized.'
+                }, status=401)
 
-    except Exception as e:
-        print("="*60)
-        print(f"CRITICAL ERROR IN process_frame: The error is '{e}'")
-        import traceback
-        traceback.print_exc()
-        print("="*60)
-        logger.error(f"An error occurred in process_frame: {e}", exc_info=True)
-        return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+        except Exception as e:
+            logger.error(f"Error processing frame for session {session_id}: {e}")
+            return JsonResponse({'status': 'error', 'message': f'An internal server error occurred: {e}'}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
         
 @login_required
 @user_passes_test(is_lecturer)
