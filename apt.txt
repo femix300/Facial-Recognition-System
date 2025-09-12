@@ -1,4 +1,0 @@
-libwebp-dev
-ffmpeg
-libsm6
-libxext6
