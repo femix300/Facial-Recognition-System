@@ -1,0 +1,1099 @@
+Watching for file changes with StatReloader
+[2025-09-12 20:38:59 +0000] [2990506] [INFO] Starting gunicorn 23.0.0
+[2025-09-12 20:38:59 +0000] [2990506] [INFO] Listening at: http://0.0.0.0:3025 (2990506)
+[2025-09-12 20:38:59 +0000] [2990506] [INFO] Using worker: sync
+[2025-09-12 20:38:59 +0000] [2990507] [INFO] Booting worker with pid: 2990507
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+[2025-09-12 20:46:27 +0000] [2990506] [INFO] Handling signal: int
+[2025-09-12 21:46:27 +0100] [2990507] [INFO] Worker exiting (pid: 2990507)
+[2025-09-12 20:46:27 +0000] [2990506] [INFO] Shutting down: Master
+[2025-09-12 20:46:32 +0000] [2992464] [INFO] Starting gunicorn 23.0.0
+[2025-09-12 20:46:32 +0000] [2992464] [INFO] Listening at: http://0.0.0.0:3025 (2992464)
+[2025-09-12 20:46:32 +0000] [2992464] [INFO] Using worker: sync
+[2025-09-12 20:46:32 +0000] [2992465] [INFO] Booting worker with pid: 2992465
+[2025-09-12 20:46:39 +0000] [2992464] [INFO] Handling signal: int
+[2025-09-12 21:46:39 +0100] [2992465] [INFO] Worker exiting (pid: 2992465)
+[2025-09-12 20:46:40 +0000] [2992464] [INFO] Shutting down: Master
+[2025-09-12 21:09:25 +0000] [2997650] [INFO] Starting gunicorn 23.0.0
+[2025-09-12 21:09:25 +0000] [2997650] [INFO] Listening at: http://0.0.0.0:3025 (2997650)
+[2025-09-12 21:09:25 +0000] [2997650] [INFO] Using worker: sync
+[2025-09-12 21:09:25 +0000] [2997651] [INFO] Booting worker with pid: 2997651
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+[2025-09-12 23:22:06 +0000] [2997650] [INFO] Handling signal: hup
+[2025-09-12 23:22:06 +0000] [2997650] [INFO] Hang up: Master
+[2025-09-12 23:22:06 +0000] [2997650] [INFO] Handling signal: hup
+[2025-09-12 23:22:06 +0000] [2997650] [INFO] Hang up: Master
+[2025-09-12 23:22:06 +0000] [3024381] [INFO] Booting worker with pid: 3024381
+[2025-09-12 23:22:06 +0000] [3024383] [INFO] Booting worker with pid: 3024383
+[2025-09-12 23:22:06 +0000] [2997650] [ERROR] Worker (pid:2997651) was sent SIGHUP!
+[2025-09-13 00:22:07 +0100] [3024381] [INFO] Worker exiting (pid: 3024381)
+Forbidden (CSRF token from POST incorrect.): /login/
+Forbidden (CSRF cookie not set.): /login/
+Not Found: /.git/config
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 185, in _get_response
+    response = middleware_method(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 465, in process_view
+    self._check_token(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 368, in _check_token
+    request_csrf_token = request.POST.get("csrfmiddlewaretoken", "")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/wsgi.py", line 93, in _get_post
+    self._load_post_and_files()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 442, in _load_post_and_files
+    self._post = QueryDict(self.body, encoding="utf-8")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 389, in body
+    raise RequestDataTooBig(
+django.core.exceptions.RequestDataTooBig: Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Not Found: /accounts/login/
+Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 185, in _get_response
+    response = middleware_method(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 465, in process_view
+    self._check_token(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 368, in _check_token
+    request_csrf_token = request.POST.get("csrfmiddlewaretoken", "")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/wsgi.py", line 93, in _get_post
+    self._load_post_and_files()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 442, in _load_post_and_files
+    self._post = QueryDict(self.body, encoding="utf-8")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 389, in body
+    raise RequestDataTooBig(
+django.core.exceptions.RequestDataTooBig: Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 185, in _get_response
+    response = middleware_method(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 465, in process_view
+    self._check_token(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/middleware/csrf.py", line 368, in _check_token
+    request_csrf_token = request.POST.get("csrfmiddlewaretoken", "")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/wsgi.py", line 93, in _get_post
+    self._load_post_and_files()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 442, in _load_post_and_files
+    self._post = QueryDict(self.body, encoding="utf-8")
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/http/request.py", line 389, in body
+    raise RequestDataTooBig(
+django.core.exceptions.RequestDataTooBig: Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE.
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+Not Found: /accounts/login/
+[2025-09-13 09:13:13 +0000] [2997650] [INFO] Handling signal: term
+[2025-09-13 10:13:13 +0100] [3024383] [INFO] Worker exiting (pid: 3024383)
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+Skipping image: Found 0 faces.
+[2025-09-13 09:13:14 +0000] [2997650] [INFO] Shutting down: Master
+[2025-09-13 10:50:39 +0000] [3163196] [INFO] Starting gunicorn 23.0.0
+[2025-09-13 10:50:39 +0000] [3163196] [INFO] Listening at: http://0.0.0.0:3025 (3163196)
+[2025-09-13 10:50:39 +0000] [3163196] [INFO] Using worker: sync
+[2025-09-13 10:50:39 +0000] [3163197] [INFO] Booting worker with pid: 3163197
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 244, in _get_session
+    return self._session_cache
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 156, in home
+    return render(request, 'attendance/home.html')
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 320, in render
+    match = condition.eval(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/defaulttags.py", line 886, in eval
+    return self.value.resolve(context, ignore_failures=True)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 722, in resolve
+    obj = self.var.resolve(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 854, in resolve
+    value = self._resolve_lookup(context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/template/base.py", line 891, in _resolve_lookup
+    current = current[bit]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 251, in inner
+    self._setup()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 40, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/middleware.py", line 20, in get_user
+    request._cached_user = auth.get_user(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 304, in get_user
+    user_id = _get_user_session_key(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/__init__.py", line 95, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 55, in __getitem__
+    return self._session[key]
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/base.py", line 249, in _get_session
+    self._session_cache = self.load()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 55, in load
+    s = self._get_session_from_db()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/sessions/backends/db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/postgresql/base.py", line 332, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+django.db.utils.OperationalError: could not translate host name "dpg-d2vmn4ali9ivc7386grb0-a" to address: Temporary failure in name resolution
+
+[2025-09-13 10:56:07 +0000] [3163196] [INFO] Handling signal: term
+[2025-09-13 11:56:07 +0100] [3163197] [INFO] Worker exiting (pid: 3163197)
+[2025-09-13 10:56:07 +0000] [3163196] [INFO] Shutting down: Master
+[2025-09-13 10:56:29 +0000] [3164528] [INFO] Starting gunicorn 23.0.0
+[2025-09-13 10:56:29 +0000] [3164528] [INFO] Listening at: http://0.0.0.0:3025 (3164528)
+[2025-09-13 10:56:29 +0000] [3164528] [INFO] Using worker: sync
+[2025-09-13 10:56:29 +0000] [3164529] [INFO] Booting worker with pid: 3164529
+Internal Server Error: /student/dashboard/
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 257, in student_dashboard
+    student = get_object_or_404(Student, user=request.user)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+Not Found: /accounts/login/
+Internal Server Error: /student/dashboard/
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 257, in student_dashboard
+    student = get_object_or_404(Student, user=request.user)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+Forbidden (CSRF token from POST incorrect.): /login/
+Internal Server Error: /student/dashboard/
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 257, in student_dashboard
+    student = get_object_or_404(Student, user=request.user)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+[2025-09-13 12:03:51 +0100] [3164529] [INFO] Worker exiting (pid: 3164529)
+[2025-09-13 11:03:51 +0000] [3164528] [INFO] Handling signal: term
+[2025-09-13 11:03:51 +0000] [3164528] [ERROR] Worker (pid:3164529) was sent SIGTERM!
+[2025-09-13 11:03:51 +0000] [3164528] [INFO] Shutting down: Master
+[2025-09-13 11:05:07 +0000] [3166249] [INFO] Starting gunicorn 23.0.0
+[2025-09-13 11:05:07 +0000] [3166249] [INFO] Listening at: http://0.0.0.0:3025 (3166249)
+[2025-09-13 11:05:07 +0000] [3166249] [INFO] Using worker: sync
+[2025-09-13 11:05:07 +0000] [3166252] [INFO] Booting worker with pid: 3166252
+Forbidden (CSRF token from POST incorrect.): /login/
+Internal Server Error: /student/dashboard/
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/trenalyze-g7/home/Facial-Recognition-System/attendance/views.py", line 257, in student_dashboard
+    student = get_object_or_404(Student, user=request.user)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/trenalyze-g7/.local/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column attendance_student.face_encodings_data does not exist
+LINE 1: ...."user_id", "attendance_student"."matric_number", "attendanc...
+                                                             ^
+
+[2025-09-13 11:11:01 +0000] [3166249] [INFO] Handling signal: term
+[2025-09-13 12:11:01 +0100] [3166252] [INFO] Worker exiting (pid: 3166252)
+[2025-09-13 11:11:01 +0000] [3166249] [INFO] Shutting down: Master
+[2025-09-13 11:11:44 +0000] [3167667] [INFO] Starting gunicorn 23.0.0
+[2025-09-13 11:11:44 +0000] [3167667] [INFO] Listening at: http://0.0.0.0:3025 (3167667)
+[2025-09-13 11:11:44 +0000] [3167667] [INFO] Using worker: sync
+[2025-09-13 11:11:44 +0000] [3167668] [INFO] Booting worker with pid: 3167668

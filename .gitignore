@@ -1,1 +1,4 @@
 myenv/
+.env
+# Ignore dlib model files
+dlib_models/
